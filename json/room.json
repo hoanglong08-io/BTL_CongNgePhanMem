@@ -1,0 +1,58 @@
+[
+  {
+    "id": 1,
+    "name": "Room 101",
+    "type": "Standard",
+    "capacity": 6,
+    "price": 150000,
+    "status": "Available"
+  },
+  {
+    "id": 2,
+    "name": "Room 102",
+    "type": "Standard",
+    "capacity": 6,
+    "price": 150000,
+    "status": "Available"
+  },
+  {
+    "id": 3,
+    "name": "Room 103",
+    "type": "Standard",
+    "capacity": 8,
+    "price": 180000,
+    "status": "Maintenance"
+  },
+  {
+    "id": 4,
+    "name": "Room 201",
+    "type": "VIP",
+    "capacity": 10,
+    "price": 300000,
+    "status": "Available"
+  },
+  {
+    "id": 5,
+    "name": "Room 202",
+    "type": "VIP",
+    "capacity": 10,
+    "price": 300000,
+    "status": "Occupied"
+  },
+  {
+    "id": 6,
+    "name": "Room 301",
+    "type": "Party",
+    "capacity": 15,
+    "price": 500000,
+    "status": "Available"
+  },
+  {
+    "id": 7,
+    "name": "Room 302",
+    "type": "Party",
+    "capacity": 12,
+    "price": 420000,
+    "status": "Available"
+  }
+]

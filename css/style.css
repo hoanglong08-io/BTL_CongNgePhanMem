@@ -1,0 +1,53 @@
+/* Karaoke booking - a few custom styles on top of Bootstrap 5 */
+:root {
+  --brand: #6f2dbd;
+  --brand-dark: #2d1b4e;
+}
+
+body { background: #f5f2fa; }
+
+.navbar-karaoke { background: var(--brand-dark); }
+.navbar-karaoke .navbar-brand { 
+    font-weight: bolder; 
+    letter-spacing: 0.25px; 
+}
+.navbar-karaoke .nav-link.active {
+    border-bottom: 2px solid #c9a7f5; 
+}
+
+.btn-brand { background: var(--brand); border-color: var(--brand); color: #fff; }
+.btn-brand:hover, .btn-brand:focus { background: #5a22a0; border-color: #5a22a0; color: #fff; }
+.btn-brand:disabled { background: var(--brand); border-color: var(--brand); color: #fff; opacity: 0.6; }
+
+.page-title { margin: 1.5rem 0 1rem; }
+
+/* white panels */
+.box {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.room-card { border: 0; border-top: 4px solid var(--brand); box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15); }
+.room-card .price { font-size: 1.2rem; font-weight: 700; color: var(--brand); }
+
+.stat {
+  background: #fff;
+  border-left: 4px solid var(--brand);
+  border-radius: 6px;
+  padding: 12px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+.stat .number { font-size: 1.4rem; font-weight: 700; }
+
+.chart-wrap { position: relative; height: 300px; }
+
+.total-row td { font-size: 1.2rem; font-weight: 700; }
+
+/* print only the receipt when the cashier clicks "Print receipt" */
+@media print {
+  body * { visibility: hidden; }
+  #receiptArea, #receiptArea * { visibility: visible; }
+  #receiptArea { position: absolute; left: 0; top: 0; width: 100%; }
+}

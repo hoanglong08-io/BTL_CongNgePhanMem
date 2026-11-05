@@ -1,0 +1,52 @@
+
+
+<nav class="navbar navbar-expand-md navbar-dark bg-dark navbar-karaoke" id="mainNavbar">
+      <div class="container">
+        <a class="navbar-brand" href="/">Karaoke Room Booking</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarNav"
+          aria-controls="navbarNav"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse">
+          <ul class="navbar-nav me-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="/">Tìm phòng</a>
+            </li>
+            <li class="nav-item d-none" data-role="CLIENT">
+              <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
+            </li>
+            <li class="nav-item d-none" data-role="STAFF">
+              <a class="nav-link" href="/staff">Quầy thu ngân</a>
+            </li>
+            <li class="nav-item d-none" data-role="STAFF">
+              <a class="nav-link" href="/menu">Thực đơn</a>
+            </li>
+            <li class="nav-item d-none" data-role="OWNER">
+              <a class="nav-link" href="/analytics">Báo cáo</a>
+            </li>
+          </ul>
+          <div class="d-flex align-items-center">
+            <div id="navGuest">
+              <a class="btn btn-outline-light btn-sm me-2" href="/login"
+                >Đăng nhập</a
+              >
+              <a class="btn btn-light btn-sm" href="/register">Đăng ký</a>
+            </div>
+            <div id="navUser" class="d-none">
+              <span class="navbar-text me-3" id="navUserInfo"></span>
+              <button class="btn btn-outline-light btn-sm" id="nutDangXuat">
+                Đăng xuất
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
