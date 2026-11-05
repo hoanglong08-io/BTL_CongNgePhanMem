@@ -1,0 +1,23 @@
+[    
+    {
+      "MANV": 1,
+      "TENNV": "Nguyen Minh Chau",
+      "USERNAME": "owner",
+      "PASSWORD": "scrypt:32768:8:1$xyvgo2yyAKUInSyX$4a87d4cc2ee259e47831b76268112963ab8275df2920243ae7cf3dc95ee132383d69145ca3858e4d824b2209051a9d793911d08009cb1b01508dd4f49c8cea52",
+      "ROLE": "OWNER"
+    },
+    {
+      "MANV": 2,
+      "TENNV": "Le Thu Lan",
+      "USERNAME": "staff",
+      "PASSWORD": "scrypt:32768:8:1$PTyURpr9V8dvrW0F$97d8592ea34833c3cecd351a010bb3e1b0c3cd9a7b0ed274371168fa986f439d93c33a60fb46e5a015c6398b2fda1103b1b4993be4d8c60e0704be4a40173925",
+      "ROLE": "STAFF"
+    },
+    {
+      "MANV": 3,
+      "TENNV": "Pham Quoc Huy",
+      "USERNAME": "staff2",
+      "PASSWORD": "scrypt:32768:8:1$2IGKx3VjCtMsDiOe$cdfced1d5184468d2950678ba0b382ef38d0f4409c3fb12b7fbb740fddafd5ec14d7a32d455401db447703e299a08680b7f4b1bc75b658e956a889500c44bab0",
+      "ROLE": "STAFF"
+    }
+]

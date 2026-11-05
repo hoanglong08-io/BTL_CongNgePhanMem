@@ -19,32 +19,52 @@
             <li class="nav-item">
               <a class="nav-link" href="/">Tìm phòng</a>
             </li>
-            <li class="nav-item d-none" data-role="CLIENT">
+            {% if session.get('role') == 'CLIENT' %}
+            <li class="nav-item">
               <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
             </li>
-            <li class="nav-item d-none" data-role="STAFF">
+            {% endif %}
+
+            {% if session.get('role') in ['STAFF', 'OWNER'] %}
+            <li class="nav-item">
               <a class="nav-link" href="/staff">Quầy thu ngân</a>
             </li>
-            <li class="nav-item d-none" data-role="STAFF">
+            <li class="nav-item">
               <a class="nav-link" href="/menu">Thực đơn</a>
             </li>
-            <li class="nav-item d-none" data-role="OWNER">
+            {% endif %}
+
+            {% if session.get('role') == 'OWNER' %}
+            <li class="nav-item">
               <a class="nav-link" href="/analytics">Báo cáo</a>
             </li>
+            {% endif %}
           </ul>
+
+
+          
+
+
           <div class="d-flex align-items-center">
+            {% if session.get('username') %}
+          
+            <!--Sau khi ddawng nhajp thanh congo, sẽ hiện username và role-->
+            <div id="navUser">
+                <span class="navbar-text me-3" id="navUserInfo">
+                    {{ session.get('username') }}
+                    {% if session.get('role') %}
+                    ({{ session.get('role')|lower }})
+                    {% endif %}
+                </span>
+                <a href="/logout" class="btn btn-outline-light btn-sm" id="nutDangXuat">Đăng xuất</a>
+            </div>
+            {% else %}
+          <!--chưa đăng nhập-->
             <div id="navGuest">
-              <a class="btn btn-outline-light btn-sm me-2" href="/login"
-                >Đăng nhập</a
-              >
-              <a class="btn btn-light btn-sm" href="/register">Đăng ký</a>
+                <a class="btn btn-outline-light btn-sm me-2" href="/login">Đăng nhập</a>
+                <a class="btn btn-light btn-sm" href="/register">Đăng ký</a>
             </div>
-            <div id="navUser" class="d-none">
-              <span class="navbar-text me-3" id="navUserInfo"></span>
-              <button class="btn btn-outline-light btn-sm" id="nutDangXuat">
-                Đăng xuất
-              </button>
-            </div>
+            {% endif %}
           </div>
         </div>
       </div>

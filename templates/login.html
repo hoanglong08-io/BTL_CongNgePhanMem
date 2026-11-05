@@ -1,29 +1,51 @@
-{%extends 'layout/base.html'%}
-  {%block content%}
+{%extends 'layout/base.html'%} 
 
-    <div class="container" style="max-width: 420px">
-      <h1 class="h3 page-title">Log in</h1>
-      <form id="loginForm" class="box">
-        <div id="formAlert"></div>
-        <div class="mb-3">
-          <label class="form-label" for="username">Username</label>
-          <input id="username" class="form-control" required autofocus />
-        </div>
-        <div class="mb-3">
-          <label class="form-label" for="password">Password</label>
-          <input type="password" id="password" class="form-control" required />
-        </div>
-        <button type="submit" class="btn btn-brand w-100">Log in</button>
-      </form>
-      <p class="mt-3">
-        No account yet? <a href="register.html">Register as a customer</a>
-      </p>
-      <p class="small text-muted">
-        Demo logins: owner / owner123, staff / staff123, customer / customer123
-      </p>
+{%block content%}
+
+
+
+<div class="container" style="max-width: 420px">
+  <h1 class="h3 page-title">Log in</h1>
+  <form id="loginForm" class="box" action="/login" method="POST">
+    <div id="formAlert"></div>
+    <div class="mb-3">
+      <label class="form-label" for="username">Username</label>
+      <input
+        id="username"
+        name="username"
+        class="form-control"
+        required
+        autofocus
+      />
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="password">Password</label>
+      <input
+        type="password"
+        name="password"
+        id="password"
+        class="form-control"
+        required
+      />
     </div>
 
-    <script src="js/vendor/bootstrap.bundle.min.js"></script>
-    <!-- <script src="js/common.js"></script> -->
-    <!-- <script src="js/login.js"></script> -->
-  {%endblock%}
+    <!-- cảnh báo đăng nhập sai -->
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="text-danger small mb-3">
+          {{ messages[0] }}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <button type="submit" class="btn btn-brand w-100">Log in</button>
+  </form>
+  <p class="mt-3">
+    No account yet? <a href="register.html">Register as a customer</a>
+  </p>
+  <p class="small text-muted"></p>
+</div>
+
+<script src="js/vendor/bootstrap.bundle.min.js"></script>
+
+{%endblock%}

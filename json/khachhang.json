@@ -1,0 +1,30 @@
+[
+    {
+      "MAKH": 1,
+      "TENKH": "Nguyen Van An",
+      "SDT": "0901000001",
+      "USERNAME": "customer",
+      "PASSWORD": "pbkdf2:sha256:1000000$HA5C2mHunvSUY2DE$ad2cc2682235255d39d6ec7a2704529299e8b676200c43a5f55a107e7eba97cd"
+    },
+    {
+      "MAKH": 2,
+      "TENKH": "Tran Thi Binh",
+      "SDT": "0901000002",
+      "USERNAME": "binh",
+      "PASSWORD": "pbkdf2:sha256:1000000$HA5C2mHunvSUY2DE$ad2cc2682235255d39d6ec7a2704529299e8b676200c43a5f55a107e7eba97cd"
+    },
+    {
+      "MAKH": 3,
+      "TENKH": "Le Hoang Cuong",
+      "SDT": "0901000003",
+      "USERNAME": "cuong",
+      "PASSWORD": "pbkdf2:sha256:1000000$HA5C2mHunvSUY2DE$ad2cc2682235255d39d6ec7a2704529299e8b676200c43a5f55a107e7eba97cd"
+    },
+    {
+      "MAKH": 4,
+      "TENKH": "Pham Thi Dung",
+      "SDT": "0901000004",
+      "USERNAME": "dung",
+      "PASSWORD": "pbkdf2:sha256:1000000$HA5C2mHunvSUY2DE$ad2cc2682235255d39d6ec7a2704529299e8b676200c43a5f55a107e7eba97cd"
+    }
+]

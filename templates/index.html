@@ -74,7 +74,7 @@
       </div>
     </div>
 
-    <!-- booking form -->
+    <!-- form đặt phòng -->
     <div class="modal fade" id="bookingModal" tabindex="-1">
       <div class="modal-dialog">
         <form class="modal-content" id="bookingForm">
@@ -89,7 +89,7 @@
           <div class="modal-body">
             <div id="bookingAlert"></div>
 
-            <!-- only shown to staff: they book for a walk-in or phone customer -->
+            {% if session.get('role') in ['STAFF', 'OWNER'] %}
             <div id="staffFields" class="row g-3 mb-3 d-none">
               <div class="col-sm-5">
                 <label class="form-label" for="customerPhone"
@@ -110,7 +110,7 @@
               </div>
               <div class="col-12 small text-muted" id="customerHint"></div>
             </div>
-
+            {% endif %}
             <div class="row g-3">
               <div class="col-sm-6">
                 <label class="form-label" for="bookStart">Start</label>
