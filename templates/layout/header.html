@@ -51,7 +51,7 @@
             <!--Sau khi ddawng nhajp thanh congo, sẽ hiện username và role-->
             <div id="navUser">
                 <span class="navbar-text me-3" id="navUserInfo">
-                    {{ session.get('username') }}
+                    {{ session.get('name') }}
                     {% if session.get('role') %}
                     ({{ session.get('role')|lower }})
                     {% endif %}
