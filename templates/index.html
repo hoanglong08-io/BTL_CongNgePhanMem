@@ -43,6 +43,9 @@
             <label class="form-label" for="searchType">Room type</label>
             <select id="searchType" class="form-select">
               <option value="">Any type</option>
+               {% for t in types %}
+                  <option value="{{ t.type }}" {% if form.get('searchType') == t.LOAIPHONG %}selected{% endif %}>{{ t.type }}</option>
+              {% endfor %}
             </select>
           </div>
           <div class="col-md-2">

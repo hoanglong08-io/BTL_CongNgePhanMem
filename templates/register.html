@@ -1,0 +1,33 @@
+{% extends 'layout/base.html'%}
+{%block title%}Register{%endblock%}
+{%block content%}
+
+<div class="container"  style="max-width: 420px">
+  <div class="form-card">
+    <h1 class="h3 text-center mb-3">Create a customer account</h1>
+
+    <form action="\register" method="POST" class="box">
+      <div class="mb-3">
+        <label class="form-label" for="name">Full name</label>
+        <input type="text" name="name" id="name" class="form-control" required autofocus>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="phone">Phone number</label>
+        <input type="text" name="phone" id="phone" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="username">Username</label>
+        <input type="text" name="username" id="username" class="form-control" minlength="3" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label" for="password">Password</label>
+        <input type="password" name="password" id="password" class="form-control" placeholder="at least 6 character" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-brand w-100">Register</button>
+    </form>
+
+    <p class="text-center mt-3">Already registered? <a href="\login">Log in</a></p>
+  </div>
+</div>
+
+{%endblock%}
