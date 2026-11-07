@@ -1,13 +1,13 @@
 import json
 from werkzeug.security import generate_password_hash, check_password_hash
-from db import db
-import model
+
+from model import PhongHat, DatPhong, NhanVien, KhachHang, DichVu, HoaDon, LichSuSD, ThemDichVu
 
 
 def load_room():
     # with open ("json/room.json", encoding = "utf-8") as f:
     #     return json.load(f)
-    return model.PhongHat.query.all()
+    return PhongHat.query.all()
 
 
 def search_room(guest=2, type=None, trang_thai="Available"):

@@ -2,13 +2,13 @@ from flask import Flask, render_template, request, session, redirect, flash
 from werkzeug.security import check_password_hash, generate_password_hash
 import dao
 
+from db import app
 
-
-app = Flask(__name__)
+# app = Flask(__name__)
 app.secret_key = 'karaoke_secret_key'
 
 
-@app.route("/")
+@app.route("/from")
 def home():
     rooms = dao.load_room()
     types = dao.load_room()
@@ -42,7 +42,7 @@ def logout():
     session.clear()
     return redirect('/')
 
-@app.route('/register', method=['GET','POST'])
+@app.route('/register', methods=['GET','POST'])
 def register():
     if request.method == 'GET':
         return render_template('register.html')
