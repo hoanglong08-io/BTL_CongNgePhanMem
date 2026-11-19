@@ -1,6 +1,9 @@
 from db import db, app
+from flask_login import UserMixin
 
-class KhachHang(db.Model):
+
+
+class KhachHang(db.Model, UserMixin):
     __tablename__ = 'khach_hang'
 
     MAKH = db.Column(db.String(10), primary_key=True)
@@ -13,7 +16,7 @@ class KhachHang(db.Model):
         # return f"<KhachHang MAKH='{self.MAKH}', TENKH='{self.TENKH}', SDT='{self.SDT}', USERNAME='{self.USERNAME}', PASSWORD='{self.PASSWORD}'>"
 
 
-class NhanVien(db.Model):
+class NhanVien(db.Model, UserMixin):
     __tablename__ = 'nhan_vien'
 
     MANV = db.Column(db.String(10), primary_key=True)

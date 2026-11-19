@@ -1,72 +1,77 @@
+<nav
+  class="navbar navbar-expand-md navbar-dark bg-dark navbar-karaoke"
+  id="mainNavbar"
+>
+  <div class="container">
+    <a class="navbar-brand" href="/">Karaoke Room Booking</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="/">Tìm phòng</a>
+        </li>
 
+        {% if current_user.is_authenticated %}
+        <!-- 1. Menu cho Khách hàng (CLIENT) -->
+        {% if current_user.role == 'CLIENT' %}
+        <li class="nav-item">
+          <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
+        </li>
+        {% endif %}
 
-<nav class="navbar navbar-expand-md navbar-dark bg-dark navbar-karaoke" id="mainNavbar">
-      <div class="container">
-        <a class="navbar-brand" href="/">Karaoke Room Booking</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarNav"
-          aria-controls="navbarNav"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="navbar-collapse">
-          <ul class="navbar-nav me-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="/">Tìm phòng</a>
-            </li>
-            {% if session.get('role') == 'CLIENT' %}
-            <li class="nav-item">
-              <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
-            </li>
-            {% endif %}
+        <!-- 2. Menu cho Nhân viên (STAFF) -->
+        {% if current_user.role == 'STAFF' %}
+        <li class="nav-item">
+          <a class="nav-link" href="/staff">Quầy thu ngân</a>
+        </li>
+        {% endif %}
 
-            {% if session.get('role') == 'STAFF' %}
-            <li class="nav-item">
-              <a class="nav-link" href="/staff">Quầy thu ngân</a>
-            </li>
-            {% endif %}
+        <!-- 3. Menu cho Chủ quán (OWNER) -->
+        {% if current_user.role == 'OWNER' %}
+        <li class="nav-item">
+          <a class="nav-link" href="/menu">Thực đơn</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="/analytics">Báo cáo</a>
+        </li>
+        {% endif %} {% endif %}
+      </ul>
 
-            {% if session.get('role') == 'OWNER' %}
-            <li class="nav-item">
-              <a class="nav-link" href="/menu">Thực đơn</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/analytics">Báo cáo</a>
-            </li>
-            {% endif %}
-          </ul>
-
-
-          
-
-
-          <div class="d-flex align-items-center">
-            {% if session.get('username') %}
-          
-            <!--Sau khi ddawng nhajp thanh congo, sẽ hiện username và role-->
-            <div id="navUser">
-                <span class="navbar-text me-3" id="navUserInfo">
-                    {{ session.get('name') }}
-                    {% if session.get('role') %}
-                    ({{ session.get('role')|lower }})
-                    {% endif %}
-                </span>
-                <a href="/logout" class="btn btn-outline-light btn-sm" id="nutDangXuat">Đăng xuất</a>
-            </div>
-            {% else %}
-          <!--chưa đăng nhập-->
-            <div id="navGuest">
-                <a class="btn btn-outline-light btn-sm me-2" href="/login">Đăng nhập</a>
-                <a class="btn btn-light btn-sm" href="/register">Đăng ký</a>
-            </div>
-            {% endif %}
-          </div>
+      <div class="d-flex align-items-center">
+        {% if current_user.is_authenticated %}
+        <!-- Đã đăng nhập: Hiện Tên + Role + Nút Đăng xuất -->
+        <div id="navUser">
+          <span class="navbar-text me-3" id="navUserInfo">
+            {{ current_user.name }} {% if current_user.role %} ({{
+            current_user.role|lower }}) {% endif %}
+          </span>
+          <a
+            href="/logout"
+            class="btn btn-outline-light btn-sm"
+            id="nutDangXuat"
+            >Đăng xuất</a
+          >
         </div>
+        {% else %}
+        <!-- Chưa đăng nhập: Hiện nút Đăng nhập & Đăng ký -->
+        <div id="navGuest">
+          <a class="btn btn-outline-light btn-sm me-2" href="/login"
+            >Đăng nhập</a
+          >
+          <a class="btn btn-light btn-sm" href="/register">Đăng ký</a>
+        </div>
+        {% endif %}
       </div>
-    </nav>
-
+    </div>
+  </div>
+</nav>
