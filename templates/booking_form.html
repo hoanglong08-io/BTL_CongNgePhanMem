@@ -1,0 +1,86 @@
+{% extends 'layout/base.html' %}
+
+{% block content %}
+<div class="container py-4" style="max-width: 650px;">
+  <h1 class="h3 page-title mb-3">Book a Room</h1>
+  
+  <form id="bookingForm" class="box" action="/" method="POST">
+    <div id="bookingAlert"></div>
+
+    <!-- Thông tin khách hàng dành riêng cho Nhân viên / Chủ quán -->
+    {% if current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER'] %}
+    <div id="staffFields" class="row g-3 mb-3">
+      <div class="col-sm-5">
+        <label class="form-label" for="customerPhone">Customer phone</label>
+        <input
+          type="tel"
+          id="customerPhone"
+          name="customer_phone"
+          class="form-control"
+          value="{{phone}}"
+          inputmode="tel"
+          placeholder="0901234567"
+        />
+      </div>
+      <div class="col-sm-7">
+        <label class="form-label" for="customerName">Customer name</label>
+        <input 
+          type="text" 
+          id="customerName" 
+          name="customer_name" 
+          value = "{{name}}"
+          class="form-control" 
+        />
+      </div>
+      <div class="col-12 small text-muted" id="customerHint"></div>
+    </div>
+    {% endif %}
+
+    <!-- Thông tin đặt phòng -->
+    <div class="row g-3">
+      <div class="col-sm-6">
+        <label class="form-label" for="bookStart">Start time</label>
+        <input
+          type="datetime-local"
+          id="bookStart"
+          name="book_start"
+          value="{{start}}"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="col-sm-6">
+        <label class="form-label" for="bookEnd">End time</label>
+        <input
+          type="datetime-local"
+          id="bookEnd"
+          name="book_end"
+          value="{{end}}"
+          class="form-control"
+          required
+        />
+      </div>
+      <div class="col-sm-12">
+        <label class="form-label" for="bookGuests">Number of guests</label>
+        <input
+          type="number"
+          id="bookGuests"
+          name="book_guests"
+          class="form-control"
+          value ="{{sl}}"
+          min="1"
+          required
+        />
+      </div>
+    </div>
+
+    <p class="small text-muted mt-3 mb-0" id="estimate"></p>
+
+    <!-- Nút thao tác -->
+    <div class="d-flex justify-content-end gap-2 mt-4">
+      <a href="/" class="btn btn-outline-secondary">Cancel</a>
+      <button type="submit" class="btn btn-brand">Confirm booking</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -11,11 +11,12 @@ def load_room():
 
 
 class User(UserMixin):
-    def __init__(self, id, name, username, role):
+    def __init__(self, id, name, username, role, phone=None):
         self.id = str(id)
         self.name = name
         self.username = username
         self.role = role
+        self.phone = phone
 
     def __str__(self):
         return f"<User id='{self.id}', name='{self.name}', role='{self.role}'>"
@@ -40,7 +41,7 @@ def get_user_by_id(user_id):
     if str_id.startswith('KH_'):
         kh=KhachHang.query.filter_by(MAKH=id).first()
         if kh:
-            return User(id=f'KH_{kh.MAKH}', name=kh.TENKH, username=kh.USERNAME, role='CLIENT')
+            return User(id=f'KH_{kh.MAKH}', name=kh.TENKH, username=kh.USERNAME, role='CLIENT', phone=kh.SDT)
 
     if str_id.startswith('NV_'):
         nv=NhanVien.query.filter_by(MANV=id).first()

@@ -68,11 +68,10 @@
                 <h5 class="card-title">{{room.TENPHONG}}</h5>
                 <p class="text-muted mb-2">{{room.LOAIPHONG}} room, up to {{room.SUCCHUA}} guests</p>
                 <p class="price mb-3">{{room.GIATHEOGIO}} <small class="text-muted fw-normal">per hour</small></p>
-                <button type="button" class="btn btn-brand mt-auto" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#bookingModal{{ room.id }}">
-                    Book this room
-                </button>
+                <a href="{{ url_for('booking', id=room.MAPHONG, start=start, end=end, sl=sl, phone=phone, name=name) }}" 
+               class="btn btn-brand mt-auto">
+              Book this room
+            </a>
               </div>
             </div>
         </div>
@@ -81,7 +80,7 @@
       </div>
     </div>
 
-    <!-- form đặt phòng -->
+    <!-- form đặt phòng
     <div class="modal fade" id="bookingModal" tabindex="-1">
       <div class="modal-dialog">
         <form class="modal-content" id="bookingForm">
@@ -164,6 +163,6 @@
           </div>
         </form>
       </div>
-    </div>
+    </div> -->
 
     {%endblock%}
