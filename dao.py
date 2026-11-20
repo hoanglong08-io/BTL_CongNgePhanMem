@@ -35,6 +35,14 @@ def read_json_account(path = "json/khachhang.json"):
         return json.load(f)
 
 
+def get_user_by_username(username):
+    """Tìm user (KhachHang hoặc NhanVien) theo username."""
+    kh = KhachHang.query.filter_by(USERNAME=username).first()
+    if kh:
+        return kh
+    nv = NhanVien.query.filter_by(USERNAME=username).first()
+    return nv
+
 def get_user_by_id(user_id):
     str_id=str(user_id )
     id = int(str_id[3:])
@@ -50,6 +58,11 @@ def get_user_by_id(user_id):
     
     return None
 
+
+def verify_password(user, password):
+    if not user or not user.PASSWORD:
+        return False
+    return check_password_hash(user.PASSWORD, password)
 
 def check_login(username = None, password = None):
     # customers = read_json_account()

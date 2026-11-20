@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, session, redirect, flash
+from flask import Flask, render_template, request, session, redirect, flash, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 import dao
 
@@ -29,32 +29,54 @@ def home():
     return render_template("index.html", rooms=rooms)
 
 
-@app.route("/login", methods=['GET','POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
         return redirect('/')
-    
+
+    # Lấy tham số next từ cả Query String (GET) lẫn Form ngầm (POST)
+    next_page = request.args.get('next') or request.form.get('next') or ''
+
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
 
         user = dao.check_login(username, password)
         if user:
-            # lưu lại phiên làm việc
-            # session['username'] = username
-            # session['name'] = user[0]
-            # session['role'] = user[1]
-            # print(session)
             login_user(user=user)
-            # next = request.args.get('next')
-            # if next:
-            #     return redirect(next)
+            # Nếu có trang đang chờ (next_page) thì chuyển hướng tới đó
+            if next_page:
+                return redirect(next_page)
             return redirect('/')
-        
         else:
-            flash ('Tên đăng nhập hoặc mật khẩu không chính xác!')
-            return redirect('/login')
-    return render_template("login.html")
+            flash('Tên đăng nhập hoặc mật khẩu không chính xác!', 'danger')
+
+    # Khi vào bằng GET hoặc Đăng nhập thất bại -> Render template kèm biến next_page
+    return render_template("login.html", next=next_page)
+    
+
+    # if current_user.is_authenticated:
+    #     return redirect('/')
+
+    # next_page = request.args.get('next', '')
+    # error = None
+
+    # if request.method == 'POST':
+    #     username = request.form.get('username', '').strip()
+    #     password = request.form.get('password', '').strip()
+    #     next_page = request.form.get('next', '')
+
+    #     user = dao.get_user_by_username(username)
+    #     if user and dao.verify_password(user, password):
+    #         login_user(user)
+    #         flash(f'Chào mừng {user.ten}!', 'success')
+    #         if next_page and next_page.startswith('/'):
+    #             return redirect(next_page)
+    #         return redirect('/')
+    #     else:
+    #         error = 'Sai tên đăng nhập hoặc mật khẩu. Vui lòng nhập lại.'
+
+    # return render_template('login.html', next=next_page, error=error)
 
 
 @app.route("/logout")
@@ -77,7 +99,6 @@ def register():
 
 
 @app.route('/booking/<int:id>', methods=['GET','POST'])
-@login_required
 def booking(id):
 
     if request.method == 'POST':
@@ -89,6 +110,9 @@ def booking(id):
         #xử lý csdl ở đây
         
         return redirect("/")
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('login', next=request.full_path))
     
     start = request.args.get("start", "")
     end = request.args.get("end", "")
@@ -102,6 +126,7 @@ def booking(id):
         name = request.args.get("name", "")
     return render_template("booking_form.html",id=id,start=start,end=end,sl=sl,phone=phone,name=name)
 
+#đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
 
 # nhấn nút confirm thì bị lỗi chuyển về trang "/""
 # trên url chưa hiển thị thông tin như mong muốn: 

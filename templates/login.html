@@ -8,6 +8,7 @@
   <h1 class="h3 page-title">Log in</h1>
   <form id="loginForm" class="box" action="/login" method="POST">
     <div id="formAlert"></div>
+    <input type="hidden" name="next" value="{{ next or request.args.get('next', '') }}">
     <div class="mb-3">
       <label class="form-label" for="username">Username</label>
       <input
