@@ -24,9 +24,15 @@ def load_user(user_id):
 
 @app.route("/")
 def home():
-    rooms = dao.load_room()
+    # rooms = dao.load_room()
     types= dao.get_room_type()
-    return render_template("index.html", rooms=rooms, types=types)
+    start = request.args.get('start_hour', '')
+    end = request.args.get("end_hour",'')
+    room_type=request.args.get('type','')
+    guests=request.args.get('guests','')
+
+    rooms=dao.search_room(start_hour=start,end_hour=end,room_type=room_type,num_guests=guests)
+    return render_template("index.html", rooms=rooms, types=types, start=start, end=end, guests=guests)
    
 
 
@@ -35,7 +41,6 @@ def login():
     if current_user.is_authenticated:
         return redirect('/')
 
-    # Lấy tham số next từ cả Query String (GET) lẫn Form ngầm (POST)
     next_page = request.args.get('next') or request.form.get('next') or ''
     er_message = None
     if request.method == 'POST':
@@ -98,15 +103,14 @@ def booking(id):
         start = request.form.get("book_start")
         end = request.form.get("book_end")
         sl = request.form.get("sl")
-        phone = request.form.get("phone") or None
-        name = request.form.get("name") or None
+        phone = request.form.get("phone") 
+        name = request.form.get("name") 
         #xử lý csdl ở đây
         
         return redirect("/")
 
     if not current_user.is_authenticated:
         return redirect(url_for('login', next=request.full_path))
-
     return render_template("booking_form.html",id=id)
 
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
@@ -114,6 +118,7 @@ def booking(id):
 
 # login, register (success)
 # nhấn nút confirm thì bị lỗi chuyển về trang "/"" (success)
+#tim kiem phong (success)
 # trang bao
 # trang thuc don 
 # # xu ly du lieu dat phong

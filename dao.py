@@ -1,6 +1,8 @@
 import json, hashlib
 from flask_login import UserMixin
 from model import PhongHat, DatPhong, NhanVien, KhachHang, DichVu, HoaDon, LichSuSD, ThemDichVu
+from datetime import datetime
+
 
 from model import db
 from db import type_room_text
@@ -8,7 +10,7 @@ from db import type_room_text
 def load_room():
     # with open ("json/room.json", encoding = "utf-8") as f:
     #     return json.load(f)
-    return PhongHat.query.all()
+    return PhongHat.query.filter_by(TRANGTHAI='Available')
 
 def get_room_type():
     types_raw=db.session.execute(type_room_text).fetchall()
@@ -26,16 +28,39 @@ class User(UserMixin):
     def __str__(self):
         return f"<User id='{self.id}', name='{self.name}', role='{self.role}'>"
 
+#ép kieu time
+def parse_time(time_str):
+    if not time_str or not str(time_str).strip():
+        return None
+    try:
+        return datetime.strptime(str(time_str).strip(), "%H:%M").time()
+    except ValueError:
+        return None
 
+def search_room(start_hour, end_hour, room_type, num_guests):
+    query = PhongHat.query.filter(PhongHat.TRANGTHAI != 'Maintenance')
+    start_t = parse_time(start_hour)
+    end_t = parse_time(end_hour)
 
+    #lọc giờ
+    if start_t and end_t:
+        booked_room_ids = db.session.query(DatPhong.MAPHONG).filter(
+            db.func.time(DatPhong.GIOBATDAU) < end_t,
+            db.func.time(DatPhong.GIOKETTHUC) > start_t,
+            DatPhong.TRANGTHAI != 'Cancelled'
+        ).subquery()
 
-def search_room(guest=2, type=None, trang_thai="Available"):
-    with open("json/room.json", encoding="utf-8") as f:
-        rooms = json.load(f) 
-        rooms = [r for r in rooms if guest <= r['capacity'] and r['status'].__eq__(trang_thai)]
-        if type:
-            rooms = [r for r in rooms if r['type'].__eq__(type)]
-        return rooms
+        query = query.filter(~PhongHat.MAPHONG.in_(booked_room_ids))
+
+    #lọc loại phòng
+    if room_type and str(room_type).strip():
+        query = query.filter(PhongHat.LOAIPHONG == str(room_type).strip())
+
+    #lọc so luong khách
+    if num_guests and str(num_guests).isdigit():
+        query = query.filter(PhongHat.SUCCHUA >= int(num_guests))
+
+    return query.all()
 
 # def read_json_account(path = "json/khachhang.json"):
 #     with open (path, "r", encoding = "utf-8") as f:

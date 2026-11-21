@@ -8,7 +8,7 @@
         whole slot are listed.
       </p>
 
-      <form id="searchForm" class="box mb-4">
+      <form id="searchForm" action = "/" method="GET" class="box mb-4">
         <div class="row g-3 align-items-end">
           <div class="col-md-3">
             <label class="form-label" for="searchStart">From</label>
@@ -16,6 +16,8 @@
               type="time"
               id="searchStart"
               class="form-control"
+              name = "start_hour"
+              value="{{start}}"
               required
             />
           </div>
@@ -24,6 +26,8 @@
             <input
               type="time"
               id="searchEnd"
+              name="end_hour"
+              value="{{end}}"
               class="form-control"
               required
             />
@@ -36,7 +40,8 @@
               class="form-control"
               min="1"
               max="15"
-              value="2"
+              name="guests"
+              value="{{guests}}"
             />
           </div>
           <div class="col-6 col-md-2">

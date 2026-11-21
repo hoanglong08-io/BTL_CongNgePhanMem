@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, Integer, String, ForeignKey, Float, text
+from sqlalchemy import Column, Integer, String, ForeignKey, Float, text, func
 
 
 app = Flask(__name__)
