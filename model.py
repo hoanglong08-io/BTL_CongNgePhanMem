@@ -2,80 +2,70 @@ from db import db, app
 from flask_login import UserMixin
 
 
-
 class KhachHang(db.Model, UserMixin):
-    __tablename__ = 'khach_hang'
+    __tablename__ = 'KHACH_HANG'
 
-    MAKH = db.Column(db.String(10), primary_key=True)
+    MAKH = db.Column(db.Integer, primary_key=True, autoincrement=True)
     TENKH = db.Column(db.String(100), nullable=False)
     SDT = db.Column(db.String(15), nullable=False, unique=True)
     USERNAME = db.Column(db.String(50), nullable=False, unique=True)
     PASSWORD = db.Column(db.String(255))
 
-    # def __str__(self):
-        # return f"<KhachHang MAKH='{self.MAKH}', TENKH='{self.TENKH}', SDT='{self.SDT}', USERNAME='{self.USERNAME}', PASSWORD='{self.PASSWORD}'>"
+    def get_id(self):
+        return str(self.MAKH)
 
 
 class NhanVien(db.Model, UserMixin):
-    __tablename__ = 'nhan_vien'
+    __tablename__ = 'NHAN_VIEN'
 
-    MANV = db.Column(db.String(10), primary_key=True)
+    MANV = db.Column(db.Integer, primary_key=True, autoincrement=True)
     TENNV = db.Column(db.String(100), nullable=False)
     USERNAME = db.Column(db.String(50), unique=True)
     PASSWORD = db.Column(db.String(255))
     ROLE = db.Column(db.String(30))
 
-    # def __str__(self):
-        # return f"<NhanVien MANV='{self.MANV}', TENNV='{self.TENNV}', USERNAME='{self.USERNAME}', PASSWORD='{self.PASSWORD}', ROLE='{self.ROLE}'>"
+    def get_id(self):
+        return str(self.MANV)
 
 
 class PhongHat(db.Model):
-    __tablename__ = 'phong_hat'
+    __tablename__ = 'PHONG_HAT'
 
-    MAPHONG = db.Column(db.String(10), primary_key=True)
+    MAPHONG = db.Column(db.Integer, primary_key=True, autoincrement=True)
     TENPHONG = db.Column(db.String(50))
     LOAIPHONG = db.Column(db.String(50))
     SUCCHUA = db.Column(db.Integer, nullable=False)
     GIATHEOGIO = db.Column(db.Numeric(18, 2), nullable=False)
     TRANGTHAI = db.Column(db.String(30))
 
-    # def __str__(self):
-        # return f"<PhongHat MAPHONG='{self.MAPHONG}', TENPHONG='{self.TENPHONG}', LOAIPHONG='{self.LOAIPHONG}', SUCCHUA={self.SUCCHUA}, GIATHEOGIO={self.GIATHEOGIO}, TRANGTHAI='{self.TRANGTHAI}'>"
-
 
 class DatPhong(db.Model):
-    __tablename__ = 'dat_phong'
+    __tablename__ = 'DAT_PHONG'
 
-    MADATPHONG = db.Column(db.String(10), primary_key=True)
-    MAKH = db.Column(db.String(10), db.ForeignKey('khach_hang.MAKH'), nullable=False)
-    MAPHONG = db.Column(db.String(10), db.ForeignKey('phong_hat.MAPHONG'), nullable=False)
+    MADATPHONG = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=False)
+    MAPHONG = db.Column(db.Integer, db.ForeignKey('PHONG_HAT.MAPHONG'), nullable=False)
     GIOBATDAU = db.Column(db.DateTime, nullable=False)
     GIOKETTHUC = db.Column(db.DateTime, nullable=False)
     SOLUONGNGUOI = db.Column(db.Integer, nullable=False)
     TRANGTHAI = db.Column(db.String(30))
 
-    # def __str__(self):
-        # return f"<DatPhong MADATPHONG='{self.MADATPHONG}', MAKH='{self.MAKH}', MAPHONG='{self.MAPHONG}', GIOBATDAU='{self.GIOBATDAU}',GIOKETTHUC='{self.GIOKETTHUC}', SOLUONGNGUOI={self.SOLUONGNGUOI}, TRANGTHAI='{self.TRANGTHAI}'>"
-
 
 class DichVu(db.Model):
-    __tablename__ = 'dich_vu'
+    __tablename__ = 'DICH_VU'
 
-    MADV = db.Column(db.String(10), primary_key=True)
+    MADV = db.Column(db.Integer, primary_key=True, autoincrement=True)
     TENDV = db.Column(db.String(100), nullable=False)
     GIA = db.Column(db.Numeric(18, 2), nullable=False)
     LOAIDV = db.Column(db.String(50))
 
-    # def __str__(self):
-    #     return f"<DichVu MADV='{self.MADV}', TENDV='{self.TENDV}', GIA={self.GIA}, LOAIDV='{self.LOAIDV}'>"
-
 
 class HoaDon(db.Model):
-    __tablename__ = 'hoa_don'
+    __tablename__ = 'HOA_DON'
 
-    MAHD = db.Column(db.String(10), primary_key=True)
-    MADATPHONG = db.Column(db.String(10), db.ForeignKey('dat_phong.MADATPHONG'), nullable=False, unique=True)
-    MANV = db.Column(db.String(10), db.ForeignKey('nhan_vien.MANV'), nullable=False)
+    MAHD = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    MADATPHONG = db.Column(db.Integer, db.ForeignKey('DAT_PHONG.MADATPHONG'), nullable=False, unique=True)
+    MANV = db.Column(db.Integer, db.ForeignKey('NHAN_VIEN.MANV'), nullable=False)
     TIENGIO = db.Column(db.Numeric(18, 2), default=0)
     TIENDICHVU = db.Column(db.Numeric(18, 2), default=0)
     PHANTRAMGIAMGIA = db.Column(db.Numeric(5, 2), default=0)
@@ -84,35 +74,27 @@ class HoaDon(db.Model):
     TONGTIEN = db.Column(db.Numeric(18, 2), default=0)
     NGAYLAPHD = db.Column(db.DateTime)
 
-    # def __str__(self):
-    #     return f"<HoaDon MAHD='{self.MAHD}', MADATPHONG='{self.MADATPHONG}', MANV='{self.MANV}', TIENGIO={self.TIENGIO}, TIENDICHVU={self.TIENDICHVU}, PHANTRAMGIAMGIA={self.PHANTRAMGIAMGIA}, SOTIENGIAM={self.SOTIENGIAM}, TIENVAT={self.TIENVAT}, TONGTIEN={self.TONGTIEN}, NGAYLAPHD='{self.NGAYLAPHD}'>"
-
 
 class ThemDichVu(db.Model):
-    __tablename__ = 'them_dichvu'
+    __tablename__ = 'THEM_DICHVU'
 
-    MAHD = db.Column(db.String(10), db.ForeignKey('hoa_don.MAHD'), primary_key=True)
-    MADV = db.Column(db.String(10), db.ForeignKey('dich_vu.MADV'), primary_key=True)
+    MAHD = db.Column(db.Integer, db.ForeignKey('HOA_DON.MAHD'), primary_key=True)
+    MADV = db.Column(db.Integer, db.ForeignKey('DICH_VU.MADV'), primary_key=True)
     SOLUONG = db.Column(db.Integer, nullable=False)
     GIA = db.Column(db.Numeric(18, 2), nullable=False)
 
-    # def __str__(self):
-    #     return f"<ThemDichVu MAHD='{self.MAHD}', MADV='{self.MADV}', SOLUONG={self.SOLUONG}, GIA={self.GIA}>"
-
 
 class LichSuSD(db.Model):
-    __tablename__ = 'lich_su_sd'
+    __tablename__ = 'LICH_SU_SD'
 
-    MALICHSU = db.Column(db.String(10), primary_key=True)
-    MAKH = db.Column(db.String(10), db.ForeignKey('khach_hang.MAKH'), nullable=False)
-    MADATPHONG = db.Column(db.String(10), db.ForeignKey('dat_phong.MADATPHONG'), nullable=False)
+    MALICHSU = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=False)
+    MADATPHONG = db.Column(db.Integer, db.ForeignKey('DAT_PHONG.MADATPHONG'), nullable=False)
     NGAYSUDUNG = db.Column(db.DateTime, nullable=False)
     SOTIENGIAM = db.Column(db.Numeric(18, 2), default=0)
 
-    # def __str__(self):
-    #     return f"<LichSuSD MALICHSU='{self.MALICHSU}', MAKH='{self.MAKH}', MADATPHONG='{self.MADATPHONG}', NGAYSUDUNG='{self.NGAYSUDUNG}', SOTIENGIAM={self.SOTIENGIAM}>"
 
-    if __name__ == '__main__':
-        with app.app_context():
-            test = DatPhong.query.first()
-            print(test)
+if __name__ == '__main__':
+    with app.app_context():
+        test = DatPhong.query.first()
+        print(test)

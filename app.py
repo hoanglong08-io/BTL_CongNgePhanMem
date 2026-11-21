@@ -25,8 +25,9 @@ def load_user(user_id):
 @app.route("/")
 def home():
     rooms = dao.load_room()
-    types = dao.load_room()
-    return render_template("index.html", rooms=rooms)
+    types= dao.get_room_type()
+    return render_template("index.html", rooms=rooms, types=types)
+   
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -36,7 +37,7 @@ def login():
 
     # Lấy tham số next từ cả Query String (GET) lẫn Form ngầm (POST)
     next_page = request.args.get('next') or request.form.get('next') or ''
-
+    er_message = None
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -49,34 +50,11 @@ def login():
                 return redirect(next_page)
             return redirect('/')
         else:
-            flash('Tên đăng nhập hoặc mật khẩu không chính xác!', 'danger')
+            er_message = 'Tên đăng nhập hoặc mật khẩu không chính xác!'
 
     # Khi vào bằng GET hoặc Đăng nhập thất bại -> Render template kèm biến next_page
-    return render_template("login.html", next=next_page)
+    return render_template("login.html", next=next_page, er_message=er_message)
     
-
-    # if current_user.is_authenticated:
-    #     return redirect('/')
-
-    # next_page = request.args.get('next', '')
-    # error = None
-
-    # if request.method == 'POST':
-    #     username = request.form.get('username', '').strip()
-    #     password = request.form.get('password', '').strip()
-    #     next_page = request.form.get('next', '')
-
-    #     user = dao.get_user_by_username(username)
-    #     if user and dao.verify_password(user, password):
-    #         login_user(user)
-    #         flash(f'Chào mừng {user.ten}!', 'success')
-    #         if next_page and next_page.startswith('/'):
-    #             return redirect(next_page)
-    #         return redirect('/')
-    #     else:
-    #         error = 'Sai tên đăng nhập hoặc mật khẩu. Vui lòng nhập lại.'
-
-    # return render_template('login.html', next=next_page, error=error)
 
 
 @app.route("/logout")
@@ -86,16 +64,31 @@ def logout():
     logout_user()
     return redirect('/')
 
+
 @app.route('/register', methods=['GET','POST'])
 def register():
+    er_message={}
     if request.method == 'GET':
-        return render_template('register.html')
+        return render_template('register.html', er_message=er_message)
     if request.method == 'POST':
         r = request.form
-        user = r.get('name')
+        name = r.get('name')
         phone = r.get('phone')
+        username= r.get('username')
         password = r.get('password')
-    return render_template('register.html')
+
+        if phone.isdigit() or len(phone) < 10 or len(phone) > 11:
+            er_message['phone'] = 'Số điện thoại không hợp lệ (phải gồm 10 - 11 chữ số)'
+        if dao.check_username_exist(username):
+            er_message['username'] = 'Tên đăng nhập này đã có người sử dụng.'
+            print(er_message.get('username'))
+        #theem tk moi vao csdl
+        if dao.add_user(name=name, phone=phone, username=username, password=password):
+            flash('Đăng ký tài khoản thành công! Vui lòng đăng nhập.', 'success')
+            return redirect(url_for('login'))
+        else:
+            flash('Đã xảy ra lỗi hệ thống, vui lòng thử lại sau!', 'danger')
+    return render_template('register.html',er_message=er_message)
 
 
 @app.route('/booking/<int:id>', methods=['GET','POST'])
@@ -113,26 +106,23 @@ def booking(id):
 
     if not current_user.is_authenticated:
         return redirect(url_for('login', next=request.full_path))
-    
-    start = request.args.get("start", "")
-    end = request.args.get("end", "")
-    sl = request.args.get("sl", "2")
 
-    if current_user.role == 'CLIENT':
-        phone = getattr(current_user, 'phone', '')
-        name = getattr(current_user, 'name', '')
-    else:
-        phone = request.args.get("phone", "")
-        name = request.args.get("name", "")
-    return render_template("booking_form.html",id=id,start=start,end=end,sl=sl,phone=phone,name=name)
+    return render_template("booking_form.html",id=id)
 
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
 
-# nhấn nút confirm thì bị lỗi chuyển về trang "/""
-# trên url chưa hiển thị thông tin như mong muốn: 
-# /booking/id phong/start=giờ bắt đầu&end=giờ kết thúc&sl=số lượng&phone=điện thoại khách hàng&name=tên khách hàng
-# nếu đặt từ client thì phone và name gán từ tài khoản đó
-# nếu đặt từ nhân viên thì phone và name gán từ form khi submit lên
+
+# login, register (success)
+# nhấn nút confirm thì bị lỗi chuyển về trang "/"" (success)
+# trang bao
+# trang thuc don 
+# # xu ly du lieu dat phong
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=4300)
+    
+
+

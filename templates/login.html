@@ -31,13 +31,11 @@
     </div>
 
     <!-- cảnh báo đăng nhập sai -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
+      {% if er_message %}
         <div class="text-danger small mb-3">
-          {{ messages[0] }}
+          {{ er_message }}
         </div>
       {% endif %}
-    {% endwith %}
 
     <button type="submit" class="btn btn-brand w-100">Log in</button>
   </form>
