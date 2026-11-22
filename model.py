@@ -37,18 +37,23 @@ class PhongHat(db.Model):
     SUCCHUA = db.Column(db.Integer, nullable=False)
     GIATHEOGIO = db.Column(db.Numeric(18, 2), nullable=False)
     TRANGTHAI = db.Column(db.String(30))
+    
 
 
 class DatPhong(db.Model):
     __tablename__ = 'DAT_PHONG'
 
     MADATPHONG = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=False)
+    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=True)
     MAPHONG = db.Column(db.Integer, db.ForeignKey('PHONG_HAT.MAPHONG'), nullable=False)
     GIOBATDAU = db.Column(db.DateTime, nullable=False)
     GIOKETTHUC = db.Column(db.DateTime, nullable=False)
     SOLUONGNGUOI = db.Column(db.Integer, nullable=False)
     TRANGTHAI = db.Column(db.String(30))
+    KH_VANGLAI = db.Column(db.String(100), nullable = True)
+    SDT_VANGLAI = db.Column(db.String(15), nullable =True)
+
+
 
 
 class DichVu(db.Model):

@@ -1,0 +1,59 @@
+{% extends "layout/base.html" %}
+{% block title %}My booking · LUV Karaoke{% endblock %}
+{% block content %}
+<h1 class="page-title mb-3">My booking</h1>
+
+<section class="panel">
+  <div class="d-flex justify-content-between flex-wrap gap-2">
+    <h2 class="panel-title mb-1">Loyalty discount</h2>
+    <div><strong>{{ luot }}</strong> visit{{ '' if luot == 1 else 's' }} in this month</div>
+  </div>
+  <div class="d-flex justify-content-between flex-wrap gap-2 mb-2">
+    <span>
+      {% if luot >= nguong %}
+        You qualify for {{ giam|int }}% off. It is applied automatically on your next bill.
+      {% else %}
+        Complete {{ nguong - luot }} more visit{{ '' if nguong - luot == 1 else 's' }} this month to get {{ giam|int }}% off your next bill.
+      {% endif %}
+    </span>
+    <span>{{ vouchers }} voucher{{ '' if vouchers == 1 else 's' }} used</span>
+  </div>
+</section>
+
+<section class="panel">
+  <h2 class="panel-title">History</h2>
+  {% if bookings %}
+    <div class="table-scroll">
+      <table class="table-lined">
+        <thead>
+          <tr><th>Room</th><th>When</th><th>Guest</th><th>Status</th><th></th><th class="num">Total</th></tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+            <tr>
+              <td>{{ b.phong.TENPHONG }}</td>
+              <td>{{ b|khung_gio }}</td>
+              <td>{{ b.SOLUONGNGUOI }}</td>
+              <td><span class="pill pill-{{ b.TRANGTHAI|lower }}">{{ b.TRANGTHAI|status_label }}</span></td>
+              <td>
+                {% if b.TRANGTHAI == 'InUse' %}
+                  <a class="btn btn-ghost btn-sm" href="{{ url_for('order_page', madat=b.MADATPHONG) }}">Add food &amp; drink</a>
+                {% endif %}
+              </td>
+              <td class="num">
+                {% if b.TRANGTHAI == 'Completed' and b.hoa_don and b.hoa_don.NGAYLAPHD %}
+                  <a href="{{ url_for('invoice', madat=b.MADATPHONG) }}">{{ b.hoa_don.TONGTIEN|vnd }}</a>
+                {% else %}
+                  -----
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="mb-0">You have no booking yet. <a href="{{ url_for('index') }}">Find a room</a> to get started.</p>
+  {% endif %}
+</section>
+{% endblock %}

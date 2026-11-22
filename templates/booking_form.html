@@ -7,6 +7,11 @@
   <form id="bookingForm" class="box" action="{{ url_for('booking', id=id) }}" method="POST">
     <div id="bookingAlert"></div>
 
+    {%if message%}
+      <div class="alert alert-danger">
+        {{message}}
+      </div>
+    {%endif%}
     <!-- ành riêng cho Nhân viên / Chủ quán -->
     {% if current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER'] %}
     <div id="staffFields" class="row g-3 mb-3">
@@ -46,6 +51,7 @@
           name="book_start"
           value="{{start}}"
           class="form-control"
+          step="1800"
           required
         />
       </div>
@@ -57,6 +63,7 @@
           name="book_end"
           value="{{end}}"
           class="form-control"
+          step="1800"
           required
         />
       </div>
@@ -69,11 +76,16 @@
           class="form-control"
           value ="{{sl}}"
           min="1"
+          max="{{room_succhua}}"
           required
         />
       </div>
     </div>
-
+      {% if er_message %}
+        <div class="text-danger small mb-3">
+          {{ er_message }}
+        </div>
+      {% endif %}
     <p class="small text-muted mt-3 mb-0" id="estimate"></p>
 
     <!-- Nút thao tác -->

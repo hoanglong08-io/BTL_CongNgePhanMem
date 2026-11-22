@@ -3,7 +3,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 import dao
 
 from db import app
-
+from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_url, login_required, current_user
 from flask_admin import BaseView, expose
 
@@ -30,7 +30,7 @@ def home():
     end = request.args.get("end_hour",'')
     room_type=request.args.get('type','')
     guests=request.args.get('guests','')
-
+    
     rooms=dao.search_room(start_hour=start,end_hour=end,room_type=room_type,num_guests=guests)
     return render_template("index.html", rooms=rooms, types=types, start=start, end=end, guests=guests)
    
@@ -98,20 +98,29 @@ def register():
 
 @app.route('/booking/<int:id>', methods=['GET','POST'])
 def booking(id):
-
+    room = dao.get_room_by_id(id)
     if request.method == 'POST':
         start = request.form.get("book_start")
-        end = request.form.get("book_end")
+        end = request.form.get("book_end") 
         sl = request.form.get("sl")
-        phone = request.form.get("phone") 
-        name = request.form.get("name") 
-        #xử lý csdl ở đây
-        
-        return redirect("/")
+        phone = request.form.get("phone") or None
+        name = request.form.get("name") or None
+        makh = None
+        if current_user.role == 'CLIENT':
+            makh=current_user.id
+        if start >= end:
+            er_message = "Giờ kết thúc phải lớn hơn giờ bắt đầu!"
+            return render_template("booking_form.html", id= id, er_message=er_message, start=start, end=end, soluong=sl, phone=phone, name=name)
+        message, is_done = dao.confirm_booking(start=start, end=end, maphong=id, guests=sl, makh=makh, tenkh_vanglai=name, dt_vanglai=phone)
+        if is_done:
+            print (message)
+            return redirect("/")
+        return render_template("booking_form.html", id= id, message=message, start=start, end=end, soluong=sl, phone=phone, name=name)
+
 
     if not current_user.is_authenticated:
         return redirect(url_for('login', next=request.full_path))
-    return render_template("booking_form.html",id=id)
+    return render_template("booking_form.html",id=id, room_succhua=room.SUCCHUA)
 
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
 
@@ -129,5 +138,3 @@ def booking(id):
 if __name__ == "__main__":
     app.run(debug=True, port=4300)
     
-
-

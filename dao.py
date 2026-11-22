@@ -1,11 +1,14 @@
 import json, hashlib
 from flask_login import UserMixin
 from model import PhongHat, DatPhong, NhanVien, KhachHang, DichVu, HoaDon, LichSuSD, ThemDichVu
-from datetime import datetime
+from datetime import datetime, date
 
 
 from model import db
 from db import type_room_text
+
+datetime_f="%Y-%m-%d %H:%M"
+current_day = date.today() 
 
 def load_room():
     # with open ("json/room.json", encoding = "utf-8") as f:
@@ -16,6 +19,8 @@ def get_room_type():
     types_raw=db.session.execute(type_room_text).fetchall()
     types=[row[0] for row in types_raw]
     return types
+def get_room_by_id(id):
+    return PhongHat.query.get(id)
 
 class User(UserMixin):
     def __init__(self, id, name, username, role, phone=None):
@@ -30,12 +35,18 @@ class User(UserMixin):
 
 #ép kieu time
 def parse_time(time_str):
-    if not time_str or not str(time_str).strip():
-        return None
     try:
-        return datetime.strptime(str(time_str).strip(), "%H:%M").time()
+        return datetime.strptime(time_str, "%H:%M").time()
     except ValueError:
         return None
+    
+def parse_datetime(time_str):
+    full_datetime=f"{current_day} {time_str}"
+    try:
+        return datetime.strptime(full_datetime, datetime_f)
+    except ValueError:
+        return None
+
 
 def search_room(start_hour, end_hour, room_type, num_guests):
     query = PhongHat.query.filter(PhongHat.TRANGTHAI != 'Maintenance')
@@ -61,6 +72,21 @@ def search_room(start_hour, end_hour, room_type, num_guests):
         query = query.filter(PhongHat.SUCCHUA >= int(num_guests))
 
     return query.all()
+
+
+def confirm_booking(start, end, maphong, guests, makh, tenkh_vanglai, dt_vanglai):
+    
+    try:
+        start = parse_datetime(start)
+        end = parse_datetime(end)
+        dp = DatPhong(MAKH=makh, MAPHONG=maphong, GIOBATDAU=start, GIOKETTHUC=end, SOLUONGNGUOI=guests, TRANGTHAI="Booked", KH_VANGLAI=tenkh_vanglai, SDT_VANGLAI=dt_vanglai)
+        db.session.add(dp)
+        db.session.commit()
+        return "Đặt phòng thành công", True
+    except Exception as e:
+        db.session.rollback()
+        return "Đặt không thành công, vui lòng thử lại", False
+
 
 # def read_json_account(path = "json/khachhang.json"):
 #     with open (path, "r", encoding = "utf-8") as f:
@@ -146,15 +172,16 @@ def check_login(username = None, password = None):
 
 
 
-if __name__== "__main__":
-    from db import app
-    with app.app_context():
-        # user = get_user_by_id('NV_01')
-        # print(user)
+# if __name__== "__main__":
+    # from db import app
+    # with app.app_context():
+    #     # user = get_user_by_id('NV_01')
+    #     # print(user)
 
-        print(get_room_type())
+    #     print(get_room_type())
     # psw = "staff456"
     # psw = hashlib.md5(psw.encode('utf-8')).hexdigest()
     # print(psw)
+    # print(parse_datetime("14:30"), type(parse_datetime("14:30")))
     
     
