@@ -22,6 +22,31 @@ login_manager.login_message_category = 'warning'
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
 
+@app.template_filter('vnd')
+def vnd_filter(value):
+    #--> output là số thực tiền.0
+    if value is None:
+        return "0 VNĐ"
+    return "{:.1f} VNĐ".format(float(value))
+
+
+@app.template_filter('status_label')
+def status_label_filter(status):
+    return status or ''
+
+
+@app.template_filter('khung_gio')
+def khung_gio_filter(b):
+    #định dạng chuỗi thời gian 
+    start = getattr(b, 'GIOBATDAU', None)
+    end = getattr(b, 'GIOKETTHUC', None)
+    if not start:
+        return ""
+    start_str = start.strftime('%H:%M')
+    if end:
+        return f"{start_str} - {end.strftime('%H:%M %d/%m/%Y')}"
+    return start.strftime('%H:%M %d/%m/%Y')
+
 @app.route("/")
 def home():
     # rooms = dao.load_room()
@@ -57,7 +82,7 @@ def login():
         else:
             er_message = 'Tên đăng nhập hoặc mật khẩu không chính xác!'
 
-    # Khi vào bằng GET hoặc Đăng nhập thất bại -> Render template kèm biến next_page
+    # Render template kèm biến next_page
     return render_template("login.html", next=next_page, er_message=er_message)
     
 
@@ -102,16 +127,21 @@ def booking(id):
     if request.method == 'POST':
         start = request.form.get("book_start")
         end = request.form.get("book_end") 
-        sl = request.form.get("sl")
-        phone = request.form.get("phone") or None
-        name = request.form.get("name") or None
+        sl = request.form.get("book_guests")
+        phone = request.form.get("customer_phone") or None
+        name = request.form.get("customer_name") or None
         makh = None
         if current_user.role == 'CLIENT':
-            makh=current_user.id
+            makh=current_user.id #'KH_..'
+            makh=int(makh[3:])
+        elif current_user.role in ['STAFF', 'OWNER']:
+            makh = dao.get_or_create_walkin_customer(name=name, phone=phone)
         if start >= end:
             er_message = "Giờ kết thúc phải lớn hơn giờ bắt đầu!"
             return render_template("booking_form.html", id= id, er_message=er_message, start=start, end=end, soluong=sl, phone=phone, name=name)
-        message, is_done = dao.confirm_booking(start=start, end=end, maphong=id, guests=sl, makh=makh, tenkh_vanglai=name, dt_vanglai=phone)
+        message, is_done = dao.confirm_booking(start=start, end=end, maphong=id, guests=sl, makh=makh)
+        print(is_done, makh)
+        # neu dung
         if is_done:
             print (message)
             return redirect("/")
@@ -122,15 +152,26 @@ def booking(id):
         return redirect(url_for('login', next=request.full_path))
     return render_template("booking_form.html",id=id, room_succhua=room.SUCCHUA)
 
+@app.route("/my_bookings")
+@login_required
+def my_bookings():
+    makh =current_user.id
+    makh = int(makh[3:])
+    luot = dao.dem_luot_trong_thang(makh)
+    vouchers = dao.dem_voucher(makh=makh)
+    bookings = dao.get_user_booking_history(makh=makh)
+    
+    return render_template("my_booking.html", bookings=bookings, luot=luot, nguong=10, giam=dao.Decimal(5), vouchers=vouchers)
+
+
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
-
-
 # login, register (success)
 # nhấn nút confirm thì bị lỗi chuyển về trang "/"" (success)
 #tim kiem phong (success)
 # trang bao
 # trang thuc don 
-# # xu ly du lieu dat phong
+# # xu ly du lieu dat phong (done)
+# xong lich su dat phòng (done)
 
 
 

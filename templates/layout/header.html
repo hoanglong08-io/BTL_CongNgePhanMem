@@ -22,21 +22,21 @@
         </li>
 
         {% if current_user.is_authenticated %}
-        <!-- 1. Menu cho Khách hàng (CLIENT) -->
+        <!--Menu cho Khách hàng (CLIENT) -->
         {% if current_user.role == 'CLIENT' %}
         <li class="nav-item">
           <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
         </li>
         {% endif %}
 
-        <!-- 2. Menu cho Nhân viên (STAFF) -->
+        <!--Menu cho Nhân viên (STAFF) -->
         {% if current_user.role == 'STAFF' %}
         <li class="nav-item">
           <a class="nav-link" href="/staff">Quầy thu ngân</a>
         </li>
         {% endif %}
 
-        <!-- 3. Menu cho Chủ quán (OWNER) -->
+        <!--Menu cho Chủ quán (OWNER) -->
         {% if current_user.role == 'OWNER' %}
         <li class="nav-item">
           <a class="nav-link" href="/menu">Thực đơn</a>
@@ -49,7 +49,7 @@
 
       <div class="d-flex align-items-center">
         {% if current_user.is_authenticated %}
-        <!-- Đã đăng nhập: Hiện Tên + Role + Nút Đăng xuất -->
+        <!--Đã đăng nhập: Hiện Tên + Role + Nút Đăng xuất -->
         <div id="navUser">
           <span class="navbar-text me-3" id="navUserInfo">
             {{ current_user.name }} {% if current_user.role %} ({{
@@ -63,7 +63,7 @@
           >
         </div>
         {% else %}
-        <!-- Chưa đăng nhập-->
+        <!--Chưa đăng nhập-->
         <div id="navGuest">
           <a class="btn btn-outline-light btn-sm me-2" href="/login"
             >Đăng nhập</a

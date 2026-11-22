@@ -5,11 +5,11 @@ from flask_login import UserMixin
 class KhachHang(db.Model, UserMixin):
     __tablename__ = 'KHACH_HANG'
 
-    MAKH = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    MAKH = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable = False)
     TENKH = db.Column(db.String(100), nullable=False)
     SDT = db.Column(db.String(15), nullable=False, unique=True)
     USERNAME = db.Column(db.String(50), nullable=False, unique=True)
-    PASSWORD = db.Column(db.String(255))
+    PASSWORD = db.Column(db.String(255), nullable=True)
 
     def get_id(self):
         return str(self.MAKH)
@@ -44,14 +44,12 @@ class DatPhong(db.Model):
     __tablename__ = 'DAT_PHONG'
 
     MADATPHONG = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=True)
+    MAKH = db.Column(db.Integer, db.ForeignKey('KHACH_HANG.MAKH'), nullable=False)
     MAPHONG = db.Column(db.Integer, db.ForeignKey('PHONG_HAT.MAPHONG'), nullable=False)
     GIOBATDAU = db.Column(db.DateTime, nullable=False)
     GIOKETTHUC = db.Column(db.DateTime, nullable=False)
     SOLUONGNGUOI = db.Column(db.Integer, nullable=False)
     TRANGTHAI = db.Column(db.String(30))
-    KH_VANGLAI = db.Column(db.String(100), nullable = True)
-    SDT_VANGLAI = db.Column(db.String(15), nullable =True)
 
 
 

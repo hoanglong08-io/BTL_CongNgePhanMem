@@ -12,3 +12,4 @@ db = SQLAlchemy(app)
 
 type_room_text=text("SELECT DISTINCT LOAIPHONG FROM PHONG_HAT")
 
+

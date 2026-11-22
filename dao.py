@@ -1,7 +1,8 @@
-import json, hashlib
+import json, hashlib, math
 from flask_login import UserMixin
 from model import PhongHat, DatPhong, NhanVien, KhachHang, DichVu, HoaDon, LichSuSD, ThemDichVu
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+from decimal import Decimal
 
 
 from model import db
@@ -74,32 +75,56 @@ def search_room(start_hour, end_hour, room_type, num_guests):
     return query.all()
 
 
-def confirm_booking(start, end, maphong, guests, makh, tenkh_vanglai, dt_vanglai):
-    
+def confirm_booking(start, end, maphong, guests, makh):
+    start = parse_datetime(start)
+    end = parse_datetime(end)
     try:
-        start = parse_datetime(start)
-        end = parse_datetime(end)
-        dp = DatPhong(MAKH=makh, MAPHONG=maphong, GIOBATDAU=start, GIOKETTHUC=end, SOLUONGNGUOI=guests, TRANGTHAI="Booked", KH_VANGLAI=tenkh_vanglai, SDT_VANGLAI=dt_vanglai)
+        
+        dp = DatPhong(MAKH=makh, MAPHONG=maphong, GIOBATDAU=start, GIOKETTHUC=end, SOLUONGNGUOI=guests, TRANGTHAI="Booked")
         db.session.add(dp)
+        room = PhongHat.query.get(maphong)
+        room.TRANGTHAI = 'Occupied'
         db.session.commit()
         return "Đặt phòng thành công", True
     except Exception as e:
+        print({e})
         db.session.rollback()
         return "Đặt không thành công, vui lòng thử lại", False
 
+def get_user_booking_history(makh):
+    """Lấy danh sách lịch sử đặt phòng của khách hàng kèm tổng tiền hóa đơn (nếu có)."""
+    return (db.session.query( DatPhong.MADATPHONG, PhongHat.TENPHONG, DatPhong.GIOBATDAU, DatPhong.GIOKETTHUC, 
+                             DatPhong.SOLUONGNGUOI, DatPhong.TRANGTHAI, HoaDon.TONGTIEN)
+            .join(PhongHat, DatPhong.MAPHONG == PhongHat.MAPHONG)
+            .outerjoin(HoaDon, DatPhong.MADATPHONG == HoaDon.MADATPHONG)
+            .filter(DatPhong.MAKH == makh)
+            .order_by(DatPhong.GIOBATDAU.desc())
+            .all())
+
+def tinh_tien_phong(start, end, price):
+    start=parse_datetime(start)
+    end=parse_datetime(end)
+    total_second = (end-start).total_seconds()
+    hours=total_second//3600
+    remainin=total_second%3600
+    #loos 10 phut se thanh 1 tieng
+    if remainin >= 600:
+        hours+=1
+    total_price = hours * price
+    return hours, total_price
 
 # def read_json_account(path = "json/khachhang.json"):
 #     with open (path, "r", encoding = "utf-8") as f:
 #         return json.load(f)
 
 
-def get_user_by_username(username):
-    """Tìm user (KhachHang hoặc NhanVien) theo username."""
-    kh = KhachHang.query.filter_by(USERNAME=username).first()
-    if kh:
+def get_customer_by_username(username):
+    try:
+        kh = KhachHang.query.filter_by(USERNAME=username).first()
         return kh
-    nv = NhanVien.query.filter_by(USERNAME=username).first()
-    return nv
+    except Exception as e:
+        print({e})
+        return None
 
 def get_user_by_id(user_id):
     str_id=str(user_id )
@@ -108,7 +133,6 @@ def get_user_by_id(user_id):
         kh=KhachHang.query.filter_by(MAKH=id).first()
         if kh:
             return User(id=f'KH_{kh.MAKH}', name=kh.TENKH, username=kh.USERNAME, role='CLIENT', phone=kh.SDT)
-
     if str_id.startswith('NV_'):
         nv=NhanVien.query.filter_by(MANV=id).first()
         if nv:
@@ -116,6 +140,24 @@ def get_user_by_id(user_id):
     
     return None
 
+
+def get_or_create_walkin_customer(name, phone):
+    username_temp = f"{name}:{phone}"
+    existing_kh = KhachHang.query.filter(
+        (KhachHang.SDT == phone) | (KhachHang.USERNAME == username_temp)
+    ).first()
+    if existing_kh:
+        return existing_kh.MAKH  # MAKH đã tồn tại
+    # chua tung ghe truoc day (vang lai)
+    try:
+        new_kh = KhachHang( TENKH=name, SDT=phone, USERNAME=username_temp, PASSWORD=None)
+        db.session.add(new_kh)
+        db.session.commit()
+        return new_kh.MAKH  # MAKH mới vừa tự động sinh 
+    except Exception as e:
+        print(f"Lỗi tạo khách vãng lai: {e}")
+        db.session.rollback()
+        return None
 
 def check_username_exist(username):
     return KhachHang.query.filter_by(USERNAME=username).first is not None
@@ -125,21 +167,12 @@ def verify_password(user, password):
         return False
     return user.PASSWORD == hashlib.md5(password.encode('utf-8')).hexdigest()
 
-def add_user(name, phone, username, password):
+def add_user(name, phone, username, password=None):
     try:
-        # 1. Băm mật khẩu trước khi lưu
-        hashed_pwd = hashlib.md5(password.encode('utf-8')).hexdigest()
-
-        # 2. Khởi tạo đối tượng Model với dữ liệu từ form
-        new_user = KhachHang(
-            TENKH=name,
-            SDT=phone,
-            USERNAME=username,
-            PASSWORD=hashed_pwd
-            # Nếu có thêm các trường như role, bạn có thể gán mặc định: role='CLIENT'
-        )
-
-        # 3. Đưa vào Session và Commit xuống MySQL
+        # Băm mật khẩu trước khi lưu
+        if password:
+            password = hashlib.md5(password.encode('utf-8')).hexdigest()
+        new_user = KhachHang( TENKH=name, SDT=phone, USERNAME=username, PASSWORD=password)
         db.session.add(new_user)
         db.session.commit()
         return True
@@ -159,9 +192,7 @@ def check_login(username = None, password = None):
     if customer and customer.PASSWORD:
         if verify_password(customer, password):
             return User(id=f"KH_{customer.MAKH}", name=customer.TENKH, username=customer.USERNAME, role="CLIENT", phone=customer.SDT)
-
     # staff_owner = read_json_account("json/nhanvien_owner.json")
-
     staff = NhanVien.query.filter_by(USERNAME=username).first()
     if staff and staff.PASSWORD:
         if verify_password(staff,password):
@@ -171,10 +202,28 @@ def check_login(username = None, password = None):
     return None
 
 
+def dau_thang(moc):
+    return moc.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
 
-# if __name__== "__main__":
-    # from db import app
-    # with app.app_context():
+def dau_thang_sau(moc):
+    return (dau_thang(moc) + timedelta(days=32)).replace(day=1)
+
+def dem_luot_trong_thang(makh, moc=None):
+    moc = moc or datetime.now()
+    so_luot = (db.session.query(db.func.count(HoaDon.MAHD)).select_from(HoaDon)
+               .join(DatPhong, DatPhong.MADATPHONG == HoaDon.MADATPHONG)
+               .filter(DatPhong.MAKH == makh, DatPhong.TRANGTHAI == "Completed",
+                       HoaDon.NGAYLAPHD >= dau_thang(moc),
+                       HoaDon.NGAYLAPHD < dau_thang_sau(moc))
+               .scalar())
+    return so_luot or 0
+
+def dem_voucher(makh):
+    return LichSuSD.query.filter(LichSuSD.MAKH == makh, LichSuSD.SOTIENGIAM > 0).count()
+
+if __name__== "__main__":
+    from db import app
+    with app.app_context():
     #     # user = get_user_by_id('NV_01')
     #     # print(user)
 
@@ -183,5 +232,11 @@ def check_login(username = None, password = None):
     # psw = hashlib.md5(psw.encode('utf-8')).hexdigest()
     # print(psw)
     # print(parse_datetime("14:30"), type(parse_datetime("14:30")))
+    # start, end = confirm_booking("14:30", "15:00")
+    # print(start, type(start), end='\n')
+    # print(end, type(end), end='\n')
     
-    
+        gio, phi=tinh_tien_phong("14:30", "15:32", 100000)
+        print(gio, phi)
+
+        print(dem_voucher(1))

@@ -18,6 +18,10 @@
     </span>
     <span>{{ vouchers }} voucher{{ '' if vouchers == 1 else 's' }} used</span>
   </div>
+  <div class="progress" role="progressbar" aria-label="Loyalty progress"
+       aria-valuenow="{{ [luot, nguong]|min }}" aria-valuemin="0" aria-valuemax="{{ nguong }}">
+    <div class="progress-bar" style="width: {{ ([luot, nguong]|min) * 100 // nguong }}%"></div>
+  </div>
 </section>
 
 <section class="panel">
@@ -26,23 +30,30 @@
     <div class="table-scroll">
       <table class="table-lined">
         <thead>
-          <tr><th>Room</th><th>When</th><th>Guest</th><th>Status</th><th></th><th class="num">Total</th></tr>
+          <tr>
+            <th>Room</th>
+            <th>When</th>
+            <th>Guest</th>
+            <th>Status</th>
+            <th></th>
+            <th class="num">Total</th>
+          </tr>
         </thead>
         <tbody>
           {% for b in bookings %}
             <tr>
-              <td>{{ b.phong.TENPHONG }}</td>
+              <td>{{ b.TENPHONG }}</td>
               <td>{{ b|khung_gio }}</td>
               <td>{{ b.SOLUONGNGUOI }}</td>
               <td><span class="pill pill-{{ b.TRANGTHAI|lower }}">{{ b.TRANGTHAI|status_label }}</span></td>
               <td>
-                {% if b.TRANGTHAI == 'InUse' %}
-                  <a class="btn btn-ghost btn-sm" href="{{ url_for('order_page', madat=b.MADATPHONG) }}">Add food &amp; drink</a>
+                {% if b.TRANGTHAI in ['Occupied', 'InUse', 'Booked'] %}
+                  <!--nút đặt đồ ăn ở đây nha mọni người-->
                 {% endif %}
               </td>
               <td class="num">
-                {% if b.TRANGTHAI == 'Completed' and b.hoa_don and b.hoa_don.NGAYLAPHD %}
-                  <a href="{{ url_for('invoice', madat=b.MADATPHONG) }}">{{ b.hoa_don.TONGTIEN|vnd }}</a>
+                {% if b.TRANGTHAI == 'Completed' and b.TONGTIEN %}
+                  <!--chỗ này thì thanh toán-->
                 {% else %}
                   -----
                 {% endif %}
@@ -53,7 +64,7 @@
       </table>
     </div>
   {% else %}
-    <p class="mb-0">You have no booking yet. <a href="{{ url_for('index') }}">Find a room</a> to get started.</p>
+    <p class="mb-0">You have no booking yet. <a href="/">Find a room</a> to get started.</p>
   {% endif %}
 </section>
 {% endblock %}
