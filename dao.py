@@ -6,10 +6,74 @@ from decimal import Decimal
 
 
 from model import db
-from db import type_room_text
+from query import type_room_text, booking_history_cus,get_all_services_text,get_booking_by_id_text,get_ordered_items_text,get_hoadon_by_booking_text,get_them_dichvu_item_text
 
 datetime_f="%Y-%m-%d %H:%M"
 current_day = date.today() 
+
+
+def get_user_by_id(user_id):
+    str_id=str(user_id )
+    id = int(str_id[3:])
+    if str_id.startswith('KH_'):
+        kh=KhachHang.query.filter_by(MAKH=id).first()
+        if kh:
+            return User(id=f'KH_{kh.MAKH}', name=kh.TENKH, username=kh.USERNAME, role='CLIENT', phone=kh.SDT)
+    if str_id.startswith('NV_'):
+        nv=NhanVien.query.filter_by(MANV=id).first()
+        if nv:
+            return User(id=f'NV_{nv.MANV}', name=nv.TENNV, username=nv.USERNAME, role=nv.ROLE)
+    
+    return None
+
+def get_customer_by_username(username):
+    try:
+        kh = KhachHang.query.filter_by(USERNAME=username).first()
+        return kh
+    except Exception as e:
+        print({e})
+        return None
+
+def check_username_exist(username):
+    return KhachHang.query.filter_by(USERNAME=username).first is not None
+
+def verify_password(user, password):
+    if not user or not user.PASSWORD:
+        return False
+    return user.PASSWORD == hashlib.md5(password.encode('utf-8')).hexdigest()
+
+def add_user(name, phone, username, password=None):
+    try:
+        # Băm mật khẩu trước khi lưu
+        if password:
+            password = hashlib.md5(password.encode('utf-8')).hexdigest()
+        new_user = KhachHang( TENKH=name, SDT=phone, USERNAME=username, PASSWORD=password)
+        db.session.add(new_user)
+        db.session.commit()
+        return True
+    except Exception as e:
+        print(f"Lỗi khi lưu CSDL: {e}")
+        db.session.rollback()  # Hoàn tác nếu gặp lỗi
+        return False
+
+def check_login(username = None, password = None):
+    # customers = read_json_account()
+    customer = KhachHang.query.filter_by(USERNAME=username).first()
+
+    # print(customer.PASSWORD, end='\n')
+    # print(hashlib.md5(password.encode('utf-8')).hexdigest())
+
+    if customer and customer.PASSWORD:
+        if verify_password(customer, password):
+            return User(id=f"KH_{customer.MAKH}", name=customer.TENKH, username=customer.USERNAME, role="CLIENT", phone=customer.SDT)
+    # staff_owner = read_json_account("json/nhanvien_owner.json")
+    staff = NhanVien.query.filter_by(USERNAME=username).first()
+    if staff and staff.PASSWORD:
+        if verify_password(staff,password):
+            # Dùng staff.MANV, staff.TENNV, staff.ROLE (dấu chấm, không dùng ['...'])
+            return User(id=f"NV_{staff.MANV}", name=staff.TENNV, username=staff.USERNAME, role=staff.ROLE)
+        
+    return None
 
 def load_room():
     # with open ("json/room.json", encoding = "utf-8") as f:
@@ -74,6 +138,17 @@ def search_room(start_hour, end_hour, room_type, num_guests):
 
     return query.all()
 
+def tinh_tien_phong(start, end, price):
+    start=parse_datetime(start)
+    end=parse_datetime(end)
+    total_second = (end-start).total_seconds()
+    hours=total_second//3600
+    remainin=total_second%3600
+    #loos 10 phut se thanh 1 tieng
+    if remainin >= 600:
+        hours+=1
+    total_price = hours * price
+    return hours, total_price
 
 def confirm_booking(start, end, maphong, guests, makh):
     start = parse_datetime(start)
@@ -92,53 +167,13 @@ def confirm_booking(start, end, maphong, guests, makh):
         return "Đặt không thành công, vui lòng thử lại", False
 
 def get_user_booking_history(makh):
-    """Lấy danh sách lịch sử đặt phòng của khách hàng kèm tổng tiền hóa đơn (nếu có)."""
-    return (db.session.query( DatPhong.MADATPHONG, PhongHat.TENPHONG, DatPhong.GIOBATDAU, DatPhong.GIOKETTHUC, 
-                             DatPhong.SOLUONGNGUOI, DatPhong.TRANGTHAI, HoaDon.TONGTIEN)
-            .join(PhongHat, DatPhong.MAPHONG == PhongHat.MAPHONG)
-            .outerjoin(HoaDon, DatPhong.MADATPHONG == HoaDon.MADATPHONG)
-            .filter(DatPhong.MAKH == makh)
-            .order_by(DatPhong.GIOBATDAU.desc())
-            .all())
+    return db.session.execute(booking_history_cus, {"makh": makh}).all()
 
-def tinh_tien_phong(start, end, price):
-    start=parse_datetime(start)
-    end=parse_datetime(end)
-    total_second = (end-start).total_seconds()
-    hours=total_second//3600
-    remainin=total_second%3600
-    #loos 10 phut se thanh 1 tieng
-    if remainin >= 600:
-        hours+=1
-    total_price = hours * price
-    return hours, total_price
+
 
 # def read_json_account(path = "json/khachhang.json"):
 #     with open (path, "r", encoding = "utf-8") as f:
 #         return json.load(f)
-
-
-def get_customer_by_username(username):
-    try:
-        kh = KhachHang.query.filter_by(USERNAME=username).first()
-        return kh
-    except Exception as e:
-        print({e})
-        return None
-
-def get_user_by_id(user_id):
-    str_id=str(user_id )
-    id = int(str_id[3:])
-    if str_id.startswith('KH_'):
-        kh=KhachHang.query.filter_by(MAKH=id).first()
-        if kh:
-            return User(id=f'KH_{kh.MAKH}', name=kh.TENKH, username=kh.USERNAME, role='CLIENT', phone=kh.SDT)
-    if str_id.startswith('NV_'):
-        nv=NhanVien.query.filter_by(MANV=id).first()
-        if nv:
-            return User(id=f'NV_{nv.MANV}', name=nv.TENNV, username=nv.USERNAME, role=nv.ROLE)
-    
-    return None
 
 
 def get_or_create_walkin_customer(name, phone):
@@ -159,47 +194,6 @@ def get_or_create_walkin_customer(name, phone):
         db.session.rollback()
         return None
 
-def check_username_exist(username):
-    return KhachHang.query.filter_by(USERNAME=username).first is not None
-
-def verify_password(user, password):
-    if not user or not user.PASSWORD:
-        return False
-    return user.PASSWORD == hashlib.md5(password.encode('utf-8')).hexdigest()
-
-def add_user(name, phone, username, password=None):
-    try:
-        # Băm mật khẩu trước khi lưu
-        if password:
-            password = hashlib.md5(password.encode('utf-8')).hexdigest()
-        new_user = KhachHang( TENKH=name, SDT=phone, USERNAME=username, PASSWORD=password)
-        db.session.add(new_user)
-        db.session.commit()
-        return True
-    except Exception as e:
-        print(f"Lỗi khi lưu CSDL: {e}")
-        db.session.rollback()  # Hoàn tác nếu gặp lỗi
-        return False
-
-
-def check_login(username = None, password = None):
-    # customers = read_json_account()
-    customer = KhachHang.query.filter_by(USERNAME=username).first()
-
-    # print(customer.PASSWORD, end='\n')
-    # print(hashlib.md5(password.encode('utf-8')).hexdigest())
-
-    if customer and customer.PASSWORD:
-        if verify_password(customer, password):
-            return User(id=f"KH_{customer.MAKH}", name=customer.TENKH, username=customer.USERNAME, role="CLIENT", phone=customer.SDT)
-    # staff_owner = read_json_account("json/nhanvien_owner.json")
-    staff = NhanVien.query.filter_by(USERNAME=username).first()
-    if staff and staff.PASSWORD:
-        if verify_password(staff,password):
-            # Dùng staff.MANV, staff.TENNV, staff.ROLE (dấu chấm, không dùng ['...'])
-            return User(id=f"NV_{staff.MANV}", name=staff.TENNV, username=staff.USERNAME, role=staff.ROLE)
-        
-    return None
 
 
 def dau_thang(moc):
@@ -220,6 +214,98 @@ def dem_luot_trong_thang(makh, moc=None):
 
 def dem_voucher(makh):
     return LichSuSD.query.filter(LichSuSD.MAKH == makh, LichSuSD.SOTIENGIAM > 0).count()
+
+#-- uc 2 đặt món
+# goji mons
+
+
+def get_booking(madat):
+    #trả về dp.MADATPHONG, dp.MAKH, dp.MAPHONG, dp.GIOBATDAU, dp.GIOKETTHUC, dp.SOLUONGNGUOI, dp.TRANGTHAI, ph.TENPHONG
+    return db.session.execute(get_booking_by_id_text, {"madat": madat}).fetchone()
+
+def get_menu_grouped():
+    rows = db.session.execute(get_all_services_text).fetchall()
+    grouped = {}
+    for r in rows:
+        loai = r.LOAIDV or "Khác"
+        if loai not in grouped:
+            grouped[loai] = []
+        grouped[loai].append(r)
+    return grouped
+
+def get_items(don):
+   
+    madat = don.MADATPHONG if hasattr(don, 'MADATPHONG') else don
+    return db.session.execute(get_ordered_items_text, {"madat": madat}).fetchall()
+
+def add_service(madatphong, madv, so_luong, nv=None):
+    #thêm dịch vụ (uc2)
+    if not madv or so_luong <= 0:
+        return False, "Thông báo số lượng không hợp lệ / hết hàng."
+    try:
+        #hóa đơn tạm
+        hd = db.session.execute(get_hoadon_by_booking_text, {"madat": madatphong}).fetchone()
+        #chưa thì khởi tạo mới
+        if not hd:
+            manv = 1
+            if nv and hasattr(nv, 'id'):
+                manv_str = str(nv.id)
+                if manv_str.startswith('NV_'):
+                    manv = int(manv_str[3:])
+            
+            new_hd = HoaDon(MADATPHONG=madatphong, MANV=manv, TIENDICHVU=0, TONGTIEN=0)
+            db.session.add(new_hd)
+            db.session.commit()
+            mahd = new_hd.MAHD
+        else:
+            mahd = hd.MAHD
+
+        #lấy đơn giá dịch vụ 
+        dv = DichVu.query.get(madv)
+        if not dv:
+            return False, "Dịch vụ không tồn tại."
+        gia = dv.GIA
+        # kiểm dịch vụ được chọn
+        item = db.session.execute(get_them_dichvu_item_text, {"mahd": mahd, "madv": madv}).fetchone()
+
+        if item:
+            # có thì cộng dồn
+            tdv_obj = ThemDichVu.query.get((mahd, madv))
+            if tdv_obj:
+                tdv_obj.SOLUONG += so_luong
+        else:
+            #chưa thì tạo mới
+            new_item = ThemDichVu(MAHD=mahd, MADV=madv, SOLUONG=so_luong, GIA=gia)
+            db.session.add(new_item)
+
+        db.session.commit()
+
+        #tính tiền tôngg
+        items = get_items(madatphong)
+        tong_dv = tinh_tong_dich_vu(items)
+        
+        hd_obj = HoaDon.query.get(mahd)
+        if hd_obj:
+            hd_obj.TIENDICHVU = tong_dv
+            db.session.commit()
+
+        return True, "Đã thêm món vào hóa đơn tạm."
+
+    except Exception as e:
+        db.session.rollback()
+        return False, f"Lỗi hệ thống: {e}"
+# tinh tam 
+def tinh_tong_dich_vu(items):
+    #tính phí dịch vụ
+    tong = 0
+    if items:
+        for it in items:
+            tong += it.SOLUONG * it.GIA
+    return tong
+
+
+#--uc 3
+
 
 if __name__== "__main__":
     from db import app

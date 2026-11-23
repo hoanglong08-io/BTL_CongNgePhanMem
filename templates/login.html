@@ -1,16 +1,17 @@
-{%extends 'layout/base.html'%} 
+{% extends 'layout/base.html' %} 
 
-{%block content%}
+{% block title %}Log in{% endblock %}
 
-
-
-<div class="container" style="max-width: 420px">
-  <h1 class="h3 page-title">Log in</h1>
-  <form id="loginForm" class="box" action="/login" method="POST">
+{% block content %}
+<div class="container my-5" style="max-width: 420px">
+  <h1 class="h3 fw-bold mb-3">Log in</h1>
+  
+  <form id="loginForm" class="bg-white p-4 rounded-3 shadow-sm border" action="/login" method="POST">
     <div id="formAlert"></div>
     <input type="hidden" name="next" value="{{ next or request.args.get('next', '') }}">
+    
     <div class="mb-3">
-      <label class="form-label" for="username">Username</label>
+      <label class="form-label fw-semibold" for="username">Username</label>
       <input
         id="username"
         name="username"
@@ -19,8 +20,9 @@
         autofocus
       />
     </div>
+    
     <div class="mb-3">
-      <label class="form-label" for="password">Password</label>
+      <label class="form-label fw-semibold" for="password">Password</label>
       <input
         type="password"
         name="password"
@@ -30,21 +32,17 @@
       />
     </div>
 
-    <!-- cảnh báo đăng nhập sai -->
-      {% if er_message %}
-        <div class="text-danger small mb-3">
-          {{ er_message }}
-        </div>
-      {% endif %}
+    {% if er_message %}
+      <div class="alert alert-danger py-2 small mb-3">
+        {{ er_message }}
+      </div>
+    {% endif %}
 
-    <button type="submit" class="btn btn-brand w-100">Log in</button>
+    <button type="submit" class="btn btn-primary fw-semibold w-100 py-2" style="background-color: #6f2dbd; border-color: #6f2dbd;">Log in</button>
   </form>
-  <p class="mt-3">
-    No account yet? <a href="/register">Register as a customer</a>
+  
+  <p class="mt-3 text-center">
+    No account yet? <a href="/register" class="text-decoration-none fw-semibold">Register as a customer</a>
   </p>
-  <p class="small text-muted"></p>
 </div>
-
-
-
-{%endblock%}
+{% endblock %}

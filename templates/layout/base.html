@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}Karaoke Booking{% endblock %}</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="{{ url_for('static', filename='js/vendor/bootstrap.bundle.min.js') }}"></script>
-    
   </head>
-  <body>
-    {%block header%} {%include 'layout/header.html'%} 
-    {%endblock%} 
+  <body class="bg-light min-vh-100 d-flex flex-column">
+    {% block header %}
+      {% include 'layout/header.html' %} 
+    {% endblock %} 
 
-    {%block content required%} 
-    {%endblock%} 
+    <main class="flex-grow-1">
+      {% block content required %} 
+      {% endblock %} 
+    </main>
 
-    {%block footer%} 
-    {%include'layout/footer.html'%} 
-    {%endblock%}
-
+    {% block footer %} 
+      {% include 'layout/footer.html' %} 
+    {% endblock %}
   </body>
 </html>

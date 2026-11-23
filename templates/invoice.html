@@ -1,0 +1,35 @@
+{% extends "layout/base.html" %}
+{% set tieu_de = 'Receipt' if bill.da_thanh_toan else 'Check out' %}
+{% set quay_lai = url_for('reception') if current_user.role in ('STAFF', 'OWNER') else url_for('my_bookings') %}
+{% block title %}{{ tieu_de }} · {{ don.phong.TENPHONG }}{% endblock %}
+{% block content %}
+<div class="sheet">
+  <div class="sheet-head">{{ tieu_de }}</div>
+  <div class="sheet-body">
+    <h2 class="h4 fw-normal mb-1">{{ don.phong.TENPHONG }}</h2>
+    <div class="small">{{ don.khach_hang.TENKH }} · {{ don.khach_hang.SDT }}</div>
+    <div class="small mb-3">{{ don|khung_gio }} · {{ don.SOLUONGNGUOI }} guest(s)</div>
+
+    <div class="bill-row"><span>Room fee ({{ bill.gio|so_gio }} h x {{ bill.don_gia|so_tien }})</span><span>{{ bill.tien_gio|vnd }}</span></div>
+    <div class="bill-row"><span>Food and drinks</span><span>{{ bill.tien_dv|vnd }}</span></div>
+    {% for it in items %}
+      <div class="bill-row small text-muted py-0"><span>&nbsp;&nbsp;{{ it.dich_vu.TENDV }} x {{ it.SOLUONG }}</span><span>{{ (it.SOLUONG * it.GIA)|so_tien }}</span></div>
+    {% endfor %}
+    {% if bill.giam_tien and bill.giam_tien > 0 %}
+      <div class="bill-row"><span>Loyalty discount ({{ bill.giam_pct|int }}%)</span><span>- {{ bill.giam_tien|vnd }}</span></div>
+    {% endif %}
+    <div class="bill-row"><span>VAT (10%)</span><span>{{ bill.vat|vnd }}</span></div>
+    <div class="bill-total"><span>Total</span><span>{{ bill.tong|vnd }}</span></div>
+    {% if bill.luot is not none %}
+      <p class="small text-muted mt-3 mb-0">This customer has {{ bill.luot }} paid visit(s) this month (5% off from 10 visits).</p>
+    {% endif %}
+  </div>
+
+  {% if current_user.role not in ['STAFF', 'OWNER'] %}
+    <div class="sheet-foot">
+      <span class="me-auto small text-muted">Paid {{ bill.ngay_lap|dt }}{% if bill.nhan_vien %} · cashier {{ bill.nhan_vien.TENNV }}{% endif %}</span>
+      <a class="btn btn-ghost" href="/my_bookings">Close</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

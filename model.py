@@ -61,7 +61,7 @@ class DichVu(db.Model):
     TENDV = db.Column(db.String(100), nullable=False)
     GIA = db.Column(db.Numeric(18, 2), nullable=False)
     LOAIDV = db.Column(db.String(50))
-
+    TONKHO = db.Column(db.Integer)
 
 class HoaDon(db.Model):
     __tablename__ = 'HOA_DON'

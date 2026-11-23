@@ -1,39 +1,40 @@
-{% extends 'layout/base.html'%}
-{%block title%}Register{%endblock%}
-{%block content%}
+{% extends 'layout/base.html' %}
+{% block title %}Register{% endblock %}
 
-<div class="container"  style="max-width: 420px">
-  <div class="form-card">
-    <h1 class="h3 text-center mb-3">Create a customer account</h1>
+{% block content %}
+<div class="container my-5" style="max-width: 420px">
+  <h1 class="h3 fw-bold text-center mb-3">Create a customer account</h1>
 
-    <form action="\register" method="POST" class="box">
-      <div class="mb-3">
-        <label class="form-label" for="name">Full name</label>
-        <input type="text" name="name" id="name" class="form-control" required autofocus>
-      </div>
-      <div class="mb-3">
-        <label class="form-label" for="phone">Phone number</label>
-        <input type="text" name="phone" id="phone" class="form-control" required>
-      </div>
-      {% if er_message.get('phone')%}
-        <div class="alert alert-danger">{{ er_message.get('phone') }}</div>
-      {%endif%}
-      <div class="mb-3">
-        <label class="form-label" for="username">Username</label>
-        <input type="text" name="username" id="username" class="form-control" minlength="3" required>
-      </div>
-      {% if er_message.get('username')%}
-        <div class="alert alert-danger">{{ er_message.get('username') }}</div>
-      {%endif%}
-      <div class="mb-3">
-        <label class="form-label" for="password">Password</label>
-        <input type="password" name="password" id="password" class="form-control" placeholder="at least 6 character" minlength="6" required>
-      </div>
-      <button type="submit" class="btn btn-brand w-100">Register</button>
-    </form>
+  <form action="/register" method="POST" class="bg-white p-4 rounded-3 shadow-sm border">
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="name">Full name</label>
+      <input type="text" name="name" id="name" class="form-control" required autofocus>
+    </div>
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="phone">Phone number</label>
+      <input type="text" name="phone" id="phone" class="form-control" required>
+    </div>
+    {% if er_message.get('phone') %}
+      <div class="alert alert-danger py-2 small mb-3">{{ er_message.get('phone') }}</div>
+    {% endif %}
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="username">Username</label>
+      <input type="text" name="username" id="username" class="form-control" minlength="3" required>
+    </div>
+    {% if er_message.get('username') %}
+      <div class="alert alert-danger py-2 small mb-3">{{ er_message.get('username') }}</div>
+    {% endif %}
+    
+    <div class="mb-3">
+      <label class="form-label fw-semibold" for="password">Password</label>
+      <input type="password" name="password" id="password" class="form-control" placeholder="at least 6 characters" minlength="6" required>
+    </div>
+    
+    <button type="submit" class="btn btn-primary fw-semibold w-100 py-2" style="background-color: #6f2dbd; border-color: #6f2dbd;">Register</button>
+  </form>
 
-    <p class="text-center mt-3">Already registered? <a href="\login">Log in</a></p>
-  </div>
+  <p class="text-center mt-3">Already registered? <a href="/login" class="text-decoration-none fw-semibold">Log in</a></p>
 </div>
-
-{%endblock%}
+{% endblock %}

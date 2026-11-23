@@ -47,6 +47,41 @@ def khung_gio_filter(b):
         return f"{start_str} - {end.strftime('%H:%M %d/%m/%Y')}"
     return start.strftime('%H:%M %d/%m/%Y')
 
+@app.template_filter('so_tien')
+def so_tien_filter(val):
+    if not val:
+        return "0"
+    try:
+        return f"{float(val):,.0f}".replace(",", ".")
+    except (ValueError, TypeError):
+        return str(val)
+
+@app.template_filter('vnd')
+def vnd_filter(val):
+    if not val:
+        return "0 VNĐ"
+    try:
+        return f"{float(val):,.0f} VNĐ".replace(",", ".")
+    except (ValueError, TypeError):
+        return str(val)
+
+@app.template_filter('ten_phong')
+def ten_phong_filter(don):
+    if not don:
+        return ""
+    if hasattr(don, 'phong') and don.phong:
+        return getattr(don.phong, 'TENPHONG', '')
+    return getattr(don, 'TENPHONG', '')
+
+@app.template_filter('ten_dv')
+def ten_dv_filter(item):
+    if not item:
+        return ""
+    if hasattr(item, 'dich_vu') and item.dich_vu:
+        return getattr(item.dich_vu, 'TENDV', '')
+    return getattr(item, 'TENDV', '')
+
+# route
 @app.route("/")
 def home():
     # rooms = dao.load_room()
@@ -141,10 +176,12 @@ def booking(id):
             return render_template("booking_form.html", id= id, er_message=er_message, start=start, end=end, soluong=sl, phone=phone, name=name)
         message, is_done = dao.confirm_booking(start=start, end=end, maphong=id, guests=sl, makh=makh)
         print(is_done, makh)
+        luot=dao.dem_luot_trong_thang(makh)
+        vouchers = dao.dem_voucher(makh=makh)
         # neu dung
         if is_done:
             print (message)
-            return redirect("/")
+            return redirect('/my_bookings')
         return render_template("booking_form.html", id= id, message=message, start=start, end=end, soluong=sl, phone=phone, name=name)
 
 
@@ -162,6 +199,66 @@ def my_bookings():
     bookings = dao.get_user_booking_history(makh=makh)
     
     return render_template("my_booking.html", bookings=bookings, luot=luot, nguong=10, giam=dao.Decimal(5), vouchers=vouchers)
+
+#-uc 2 gọi món
+def lay_don(madat):
+    #lấy đơn hàng
+    don = dao.get_booking(madat)
+    message=''
+    makh=current_user.id
+    makh=int(makh[3:])
+    if current_user.role == "CLIENT" and don.MAKH != makh:
+        message = "Chỉ xem được đơn hàng của bản thân"
+    return don, message
+
+@app.route("/order/<madat>")
+@login_required
+def order_page(madat):
+    don, message = lay_don(madat)
+    items = dao.get_items(don)
+    tong = dao.tinh_tong_dich_vu(items)
+    if current_user.role in ['STAFF', 'OWNER']:
+        quay_lai = url_for("reception")
+    else:
+        quay_lai = url_for("my_bookings")
+
+    if message or not don:
+        flash(message, "danger")
+        return redirect(quay_lai)
+    return render_template("ordered.html", don=don, menu=dao.get_menu_grouped(),
+                           items=items, tong=tong, quay_lai=quay_lai)
+
+@app.route("/order/<madat>/add", methods=["POST"])
+@login_required
+def order_add(madat):
+    don, message = lay_don(madat)
+
+    if current_user.role in ['STAFF', 'OWNER']:
+        quay_lai = url_for("reception")
+    else:
+        quay_lai = url_for("my_bookings")
+    so_luong =int(request.form.get('soluong'))
+    # 1. Kiểm tra tồn tại đơn và quyền truy cập
+    if message or not don:
+        flash(message, "danger")
+        return redirect(quay_lai)
+    madv = request.form.get("madv", "").strip()
+    # luu dũ liệu
+    nv = current_user if current_user.role in ['STAFF', 'OWNER'] else None
+    ok, loi = dao.add_service(don.MADATPHONG, madv, so_luong, nv)
+
+    if ok:
+        flash("Đã thêm món vào hóa đơn tạm.", "success")
+    else:
+        flash(loi or "Thông báo số lượng không hợp lệ hoặc hết hàng.", "danger")
+
+    return redirect(url_for("order_page", madat=madat))
+
+@app.route("/invoice/<madat>")
+@login_required
+def invoice(madat):
+    don = lay_don(madat)
+    return render_template("checkout.html", don=don, bill=dao.hoa_don_hien_thi(don), items=dao.get_items(don))
 
 
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)

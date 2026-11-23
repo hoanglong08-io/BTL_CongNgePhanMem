@@ -1,99 +1,98 @@
 {% extends 'layout/base.html' %}
 
+{% block title %}Book a Room{% endblock %}
+
 {% block content %}
 <div class="container py-4" style="max-width: 650px;">
-  <h1 class="h3 page-title mb-3">Book a Room</h1>
+  <h1 class="h3 fw-bold mb-3">Book a Room</h1>
   
-  <form id="bookingForm" class="box" action="{{ url_for('booking', id=id) }}" method="POST">
+  <form id="bookingForm" class="bg-white p-4 rounded-3 shadow-sm border" action="{{ url_for('booking', id=id) }}" method="POST">
     <div id="bookingAlert"></div>
 
-    {%if message%}
-      <div class="alert alert-danger">
-        {{message}}
+    {% if message %}
+      <div class="alert alert-danger mb-3">
+        {{ message }}
       </div>
-    {%endif%}
-    <!-- ành riêng cho Nhân viên / Chủ quán -->
+    {% endif %}
+    <!-- nhân viên và chủ quán-->
     {% if current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER'] %}
     <div id="staffFields" class="row g-3 mb-3">
       <div class="col-sm-5">
-        <label class="form-label" for="customerPhone">Customer phone</label>
+        <label class="form-label fw-semibold" for="customerPhone">Customer phone</label>
         <input
           type="tel"
           id="customerPhone"
           name="customer_phone"
           class="form-control"
-          value="{{phone}}"
+          value="{{ phone }}"
           inputmode="tel"
           placeholder="vd: 0901234567"
           required
         />
       </div>
       <div class="col-sm-7">
-        <label class="form-label" for="customerName">Customer name</label>
+        <label class="form-label fw-semibold" for="customerName">Customer name</label>
         <input 
           type="text" 
           id="customerName" 
           name="customer_name" 
-          value = "{{name}}"
+          value="{{ name }}"
           class="form-control" 
           required
         />
       </div>
-      <div class="col-12 small text-muted" id="customerHint"></div>
     </div>
     {% endif %}
-
-    <!--thông tin đặt phòng-->
+    <!-- Thông tin đặt phòng -->
     <div class="row g-3">
       <div class="col-sm-6">
-        <label class="form-label" for="bookStart">Start time</label>
+        <label class="form-label fw-semibold" for="bookStart">Start time</label>
         <input
           type="time"
           id="bookStart"
           name="book_start"
-          value="{{start}}"
+          value="{{ start }}"
           class="form-control"
           step="1800"
           required
         />
       </div>
       <div class="col-sm-6">
-        <label class="form-label" for="bookEnd">End time</label>
+        <label class="form-label fw-semibold" for="bookEnd">End time</label>
         <input
           type="time"
           id="bookEnd"
           name="book_end"
-          value="{{end}}"
+          value="{{ end }}"
           class="form-control"
           step="1800"
           required
         />
       </div>
       <div class="col-sm-12">
-        <label class="form-label" for="bookGuests">Number of guests</label>
+        <label class="form-label fw-semibold" for="bookGuests">Number of guests</label>
         <input
           type="number"
           id="bookGuests"
           name="book_guests"
           class="form-control"
-          value ="{{sl}}"
+          value="{{ sl }}"
           min="1"
-          max="{{room_succhua}}"
+          max="{{ room_succhua }}"
           required
         />
       </div>
     </div>
-      {% if er_message %}
-        <div class="text-danger small mb-3">
-          {{ er_message }}
-        </div>
-      {% endif %}
-    <p class="small text-muted mt-3 mb-0" id="estimate"></p>
 
-   
+    {% if er_message %}
+      <div class="alert alert-danger py-2 small mt-3 mb-0">
+        {{ er_message }}
+      </div>
+    {% endif %}
+
     <div class="d-flex justify-content-end gap-2 mt-4">
-      <a href="/" class="btn btn-outline-secondary">Cancel</a>
-      <button type="submit" class="btn btn-brand">Confirm booking</button>
+      <a href="/" class="btn btn-outline-secondary px-4">Cancel</a>
+      <button type="submit" class="btn btn-primary fw-semibold px-4" style="background-color: #6f2dbd; border-color: #6f2dbd;">Confirm booking</button>
     </div>
   </form>
 </div>

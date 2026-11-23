@@ -1,0 +1,67 @@
+{% extends "layout/base.html" %}
+{% block title %}{{ don|ten_phong }} · Add food and drinks{% endblock %}
+
+{% block content %}
+<div class="container my-4" style="max-width: 900px;">
+  <div class="card shadow-sm border rounded-3 bg-white overflow-hidden">
+    
+    <div class="card-header bg-white border-bottom border-dark border-2 py-3 px-4 fs-4 fw-bold text-dark">
+      Room {{ don|ten_phong }} add food and drinks
+    </div>
+
+    <div class="card-body p-4">
+      <div class="row g-4">
+        
+        <!-- menu -->
+        <div class="col-md-7">
+          <h2 class="h6 text-uppercase text-muted fw-bold mb-3">Menu</h2>
+          
+          {% for loai, mon_list in menu.items() %}
+            <div class="fw-bold fs-5 text-dark mt-3 mb-2">{{ loai }}</div>
+            {% for m in mon_list %}
+              <form method="post" action="{{ url_for('order_add', madat=don.MADATPHONG) }}" class="d-flex align-items-center justify-content-between mb-2 py-1">
+                <input type="hidden" name="madv" value="{{ m.MADV }}">
+                
+                <span class="flex-grow-1 text-dark fs-6">
+                  {{ m.TENDV }} <span class="text-muted">[{{ m.GIA|so_tien }}]</span>
+                  <small class="text-muted ms-1">· {{ m.TONKHO }} left</small>
+                </span>
+                
+                <input class="form-control form-control-sm text-center me-2" style="width: 60px;" type="number" name="soluong" value="1" min="1" max="{{m.TONKHO}}" aria-label="Quantity of {{ m.TENDV }}">
+                <button type="submit" class="btn btn-outline-dark btn-sm px-3">Add</button>
+              </form>
+            {% endfor %}
+          {% endfor %}
+        </div>
+
+        <!-- những dịhc vụ đã ordered -->
+        <div class="col-md-5">
+          <h2 class="h6 text-uppercase text-muted fw-bold mb-3">Ordered</h2>
+          {% if items %}
+            <ul class="list-unstyled mb-0">
+              {% for it in items %}
+                <li class="d-flex justify-content-between align-items-center py-1 text-secondary fs-6">
+                  <span>{{ it|ten_dv }} x {{ it.SOLUONG }}</span>
+                  <span class="fw-semibold text-dark">{{ (it.SOLUONG * it.GIA)|so_tien }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted mb-0 fs-6">Nothing ordered yet.</p>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <div class="card-footer bg-white border-top border-dark border-2 py-3 px-4 d-flex justify-content-between align-items-center">
+      <div class="d-flex align-items-center gap-3 fs-5">
+        <span class="text-dark">Service fee</span>
+        <strong class="text-dark fw-bold">{{ tong|vnd }}</strong>
+      </div>
+      <a class="btn btn-primary fw-semibold px-4" style="background-color: #7c3aed; border: none;" href="{{ quay_lai }}">Done</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
