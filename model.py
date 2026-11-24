@@ -68,7 +68,7 @@ class HoaDon(db.Model):
 
     MAHD = db.Column(db.Integer, primary_key=True, autoincrement=True)
     MADATPHONG = db.Column(db.Integer, db.ForeignKey('DAT_PHONG.MADATPHONG'), nullable=False, unique=True)
-    MANV = db.Column(db.Integer, db.ForeignKey('NHAN_VIEN.MANV'), nullable=False)
+    MANV = db.Column(db.Integer, db.ForeignKey('NHAN_VIEN.MANV'), nullable=True)
     TIENGIO = db.Column(db.Numeric(18, 2), default=0)
     TIENDICHVU = db.Column(db.Numeric(18, 2), default=0)
     PHANTRAMGIAMGIA = db.Column(db.Numeric(5, 2), default=0)

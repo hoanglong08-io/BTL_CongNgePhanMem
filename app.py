@@ -24,7 +24,7 @@ def load_user(user_id):
 
 @app.template_filter('vnd')
 def vnd_filter(value):
-    #--> output là số thực tiền.0
+    #--> output dạn .0
     if value is None:
         return "0 VNĐ"
     return "{:.1f} VNĐ".format(float(value))
@@ -33,7 +33,6 @@ def vnd_filter(value):
 @app.template_filter('status_label')
 def status_label_filter(status):
     return status or ''
-
 
 @app.template_filter('khung_gio')
 def khung_gio_filter(b):
@@ -81,7 +80,32 @@ def ten_dv_filter(item):
         return getattr(item.dich_vu, 'TENDV', '')
     return getattr(item, 'TENDV', '')
 
-# route
+@app.template_filter('so_gio')
+def so_gio_filter(val):
+    if val is None:
+        return "0"
+    try:
+        f_val = float(val)
+        if f_val.is_integer():
+            return str(int(f_val))
+        return f"{f_val:.1f}"
+    except (ValueError, TypeError):
+        return str(val)
+
+@app.template_filter('dt')
+def dt_filter(val):
+    if not val:
+        return ""
+    if isinstance(val, str):
+        return val
+    try:
+        return val.strftime('%H:%M %d/%m/%Y')
+    except AttributeError:
+        return str(val)
+@app.route('/error')
+def error(message):
+    return render_template('error.html', message=message)
+# route tìm phòng
 @app.route("/")
 def home():
     # rooms = dao.load_room()
@@ -155,7 +179,7 @@ def register():
             flash('Đã xảy ra lỗi hệ thống, vui lòng thử lại sau!', 'danger')
     return render_template('register.html',er_message=er_message)
 
-
+# khách hàng - nhân viên: đặt phòng  (uc1)
 @app.route('/booking/<int:id>', methods=['GET','POST'])
 def booking(id):
     room = dao.get_room_by_id(id)
@@ -181,6 +205,8 @@ def booking(id):
         # neu dung
         if is_done:
             print (message)
+            if current_user.role in ['STAFF', 'OWNER']:
+                return redirect('/reception')
             return redirect('/my_bookings')
         return render_template("booking_form.html", id= id, message=message, start=start, end=end, soluong=sl, phone=phone, name=name)
 
@@ -189,9 +215,12 @@ def booking(id):
         return redirect(url_for('login', next=request.full_path))
     return render_template("booking_form.html",id=id, room_succhua=room.SUCCHUA)
 
+#khách hàng: lịch sử đặt phòng
 @app.route("/my_bookings")
 @login_required
 def my_bookings():
+    if current_user.role in ['STAFF', 'OWNER']:
+        return render_template('error.html', message="Không được phép truy cập vào chức năng của khách hàng")
     makh =current_user.id
     makh = int(makh[3:])
     luot = dao.dem_luot_trong_thang(makh)
@@ -200,22 +229,39 @@ def my_bookings():
     
     return render_template("my_booking.html", bookings=bookings, luot=luot, nguong=10, giam=dao.Decimal(5), vouchers=vouchers)
 
-#-uc 2 gọi món
+#nhân viên (staff): quầy thu ngân
+@app.route('/reception')
+def reception():
+    if current_user.role not in ['STAFF', 'OWNER']:
+        return redirect(url_for('error', message="Không được phép truy cập"))
+    return render_template("reception.html", rooms=dao.get_rooms(), statuses=dao.get_status_room_func(), bookings=dao.get_booking_receptions())
+
+
+@app.route("/cancel/<int:madat>", methods=["POST"])
+def cancel_booking(madat):
+    if current_user.role not in ['STAFF', 'OWNER']:
+        return redirect(url_for('error', message="Không được phép truy cập"))
+    ok, loi = dao.cancel_booking(madat)
+    flash("Đã hủy đơn đặt phòng." if ok else loi, "success" if ok else "danger")
+    return redirect(url_for("reception"))
+
+
+
 def lay_don(madat):
     #lấy đơn hàng
-    don = dao.get_booking(madat)
+    don = dao.get_booking_by_id(madat)
     message=''
     makh=current_user.id
     makh=int(makh[3:])
-    if current_user.role == "CLIENT" and don.MAKH != makh:
-        message = "Chỉ xem được đơn hàng của bản thân"
     return don, message
 
-@app.route("/order/<madat>")
+# dùng chung (khách hàng-nhân viên-chủ quán)
+#-uc 2 gọi món
+@app.route("/order/<int:madat>")
 @login_required
 def order_page(madat):
     don, message = lay_don(madat)
-    items = dao.get_items(don)
+    items = dao.get_mon_da_goi(don)
     tong = dao.tinh_tong_dich_vu(items)
     if current_user.role in ['STAFF', 'OWNER']:
         quay_lai = url_for("reception")
@@ -228,7 +274,7 @@ def order_page(madat):
     return render_template("ordered.html", don=don, menu=dao.get_menu_grouped(),
                            items=items, tong=tong, quay_lai=quay_lai)
 
-@app.route("/order/<madat>/add", methods=["POST"])
+@app.route("/order/<int:madat>/add", methods=["POST"])
 @login_required
 def order_add(madat):
     don, message = lay_don(madat)
@@ -254,13 +300,28 @@ def order_add(madat):
 
     return redirect(url_for("order_page", madat=madat))
 
-@app.route("/invoice/<madat>")
+@app.route("/invoice/<int:madat>")
 @login_required
 def invoice(madat):
-    don = lay_don(madat)
-    return render_template("checkout.html", don=don, bill=dao.hoa_don_hien_thi(don), items=dao.get_items(don))
+    don, message = lay_don(madat)
+    quay_lai="my_bookings" if current_user.role not in ['STAFF', 'OWNER'] else "reception"
+    if not don:
+        flash("Không tìm thấy thông tin đơn đặt phòng.", "danger")
+        return redirect(url_for("reception" if current_user.role in ['STAFF', 'OWNER'] else "my_bookings"))
+    return render_template("invoice.html", don=don, bill=dao.hoa_don_hien_thi(don), items=dao.get_mon_da_goi(don), quay_lai=quay_lai)
 
-
+@app.route("/checkout/<int:madat>", methods=['POST'])
+@login_required
+def checkout(madat):
+    phuong_thuc = request.form.get("phuong_thuc", "cash")
+    print(phuong_thuc)
+    ok, message = dao.thanh_toan_hoa_don(madat, phuong_thuc, current_user)
+    print(ok, message)
+    if ok:
+        flash("Thanh toán thành công!", "success")
+    else:
+        flash(message or "Thanh toán không thành công.", "danger")
+    return redirect(url_for("invoice", madat=madat))
 #đã chuyển tiếp được page nếu login thành công (đặt phòng khi chưa login --> login --> chuyển tiếp)
 # login, register (success)
 # nhấn nút confirm thì bị lỗi chuyển về trang "/"" (success)

@@ -29,7 +29,7 @@
 
           {% if current_user.role == 'STAFF' %}
             <li class="nav-item">
-              <a class="nav-link" href="/staff">Quầy thu ngân</a>
+              <a class="nav-link" href="/reception">Quầy thu ngân</a>
             </li>
           {% endif %}
 
@@ -37,6 +37,8 @@
             <li class="nav-item">
               <a class="nav-link" href="/menu">Thực đơn</a>
             </li>
+          {% endif %}
+          {%if current_user.role == 'OWNER' %}
             <li class="nav-item">
               <a class="nav-link" href="/analytics">Báo cáo</a>
             </li>

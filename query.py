@@ -14,11 +14,11 @@ SELECT
 FROM DAT_PHONG dp, PHONG_HAT ph
 WHERE dp.MAPHONG = ph.MAPHONG 
   AND dp.MAKH = :makh
-ORDER BY dp.GIOBATDAU DESC;
+ORDER BY dp.MADATPHONG DESC;
 """)
 #thông tin đặt phòng và tên phòng hát
 get_booking_by_id_text = text("""
-SELECT dp.MADATPHONG, dp.MAKH, dp.MAPHONG, dp.GIOBATDAU, dp.GIOKETTHUC, dp.SOLUONGNGUOI, dp.TRANGTHAI, ph.TENPHONG
+SELECT dp.MADATPHONG, dp.MAKH, dp.MAPHONG, dp.GIOBATDAU, dp.GIOKETTHUC, dp.SOLUONGNGUOI, dp.TRANGTHAI, ph.TENPHONG, ph.GIATHEOGIO
 FROM DAT_PHONG dp, PHONG_HAT ph
 WHERE dp.MAPHONG = ph.MAPHONG
   AND dp.MADATPHONG = :madat;
@@ -43,7 +43,6 @@ get_hoadon_by_booking_text = text("""
 SELECT hd.MAHD, hd.TIENDICHVU
 FROM HOA_DON hd
 WHERE hd.MADATPHONG = (
-    -- BƯỚC 1 (TRUY VẤN LỒNG): XÁC NHẬN MÃ ĐẶT PHÒNG TỒN TẠI TRONG BẢNG DAT_PHONG
     SELECT dp.MADATPHONG 
     FROM DAT_PHONG dp 
     WHERE dp.MADATPHONG = :madat
@@ -54,4 +53,35 @@ get_them_dichvu_item_text = text("""
 SELECT MAHD, MADV, SOLUONG, GIA
 FROM THEM_DICHVU
 WHERE MAHD = :mahd AND MADV = :madv;
+""")
+
+
+get_status_room_text= text("""
+SELECT DISTINCT TRANGTHAI
+FROM PHONG_HAT
+""")
+
+get_booking_reception_text = text("""
+SELECT ph.TENPHONG, kh.TENKH, dp.GIOBATDAU, dp.GIOKETTHUC, dp.SOLUONGNGUOI, dp.TRANGTHAI, dp.MADATPHONG
+FROM DAT_PHONG dp, PHONG_HAT ph, KHACH_HANG kh
+WHERE dp.MAKH = kh.MAKH AND dp.MAPHONG = ph.MAPHONG
+ORDER BY dp.MADATPHONG DESC
+""")
+
+# khi toiws giờ thì sẽ tự động cập nhật trạng thái
+auto_update_booking_status_text = text("""
+UPDATE DAT_PHONG 
+SET TRANGTHAI = 'InUse' 
+WHERE TRANGTHAI = 'Booked' AND GIOBATDAU <= :now
+""")
+
+#nếu inuse thì sẽ chuyển sang occupied
+auto_update_room_status_text = text("""
+UPDATE PHONG_HAT 
+SET TRANGTHAI = 'Occupied' 
+WHERE MAPHONG IN (
+    SELECT MAPHONG 
+    FROM DAT_PHONG 
+    WHERE TRANGTHAI = 'InUse'
+) AND TRANGTHAI = 'Available'
 """)

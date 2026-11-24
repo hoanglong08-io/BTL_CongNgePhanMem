@@ -69,7 +69,7 @@
                   {% if b.TRANGTHAI == 'Completed' %}
                     <a href="{{ url_for('invoice', madat=b.MADATPHONG) }}">{{ b.TONGTIEN|vnd }}</a>
                   {% else %}
-                    <a class="text-muted">---</a>
+                    <a class="btn btn-primary btn-sm fw-semibold px-3" style="background-color: #7c3aed; border: none;" href="{{ url_for('invoice', madat=b.MADATPHONG) }}">Check out</a>
                   {% endif %}
                 </td>
               </tr>
