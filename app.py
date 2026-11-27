@@ -55,15 +55,6 @@ def so_tien_filter(val):
     except (ValueError, TypeError):
         return str(val)
 
-@app.template_filter('vnd')
-def vnd_filter(val):
-    if not val:
-        return "0 VNĐ"
-    try:
-        return f"{float(val):,.0f} VNĐ".replace(",", ".")
-    except (ValueError, TypeError):
-        return str(val)
-
 @app.template_filter('ten_phong')
 def ten_phong_filter(don):
     if not don:
@@ -229,13 +220,17 @@ def my_bookings():
     
     return render_template("my_booking.html", bookings=bookings, luot=luot, nguong=10, giam=dao.Decimal(5), vouchers=vouchers)
 
-#nhân viên (staff): quầy thu ngân
+#nhân viên (staff)
 @app.route('/reception')
 def reception():
     if current_user.role not in ['STAFF', 'OWNER']:
         return redirect(url_for('error', message="Không được phép truy cập"))
     return render_template("reception.html", rooms=dao.get_rooms(), statuses=dao.get_status_room_func(), bookings=dao.get_booking_receptions())
 
+@app.route('/menu')
+def menu():
+    bookings=dao.get_booking_receptions()
+    return render_template('menu.html', bookings=bookings)
 
 @app.route("/cancel/<int:madat>", methods=["POST"])
 def cancel_booking(madat):
@@ -331,8 +326,19 @@ def checkout(madat):
 # # xu ly du lieu dat phong (done)
 # xong lich su dat phòng (done)
 
-
-
+# admin-------
+@app.route('/login-admin', methods=['POST'])
+def login_admin():
+    username = request.form.get('username')
+    passwd = request.form.get('passwd')
+    u = dao.check_login(username=username, password=passwd)
+    if u:
+        login_user(user=u)
+        return redirect('/admin')
+    else:
+        err_msg = "Tài khoản hoặc mật khẩu chưa đúng!"
+        return render_template("admin/login.html", err_msg=err_msg)
+import admin
 
 if __name__ == "__main__":
     app.run(debug=True, port=4300)

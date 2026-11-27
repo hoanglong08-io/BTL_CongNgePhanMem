@@ -16,26 +16,10 @@
     
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link active" href="/">Tìm phòng</a>
-        </li>
-
-        {% if current_user.is_authenticated %}
-          {% if current_user.role == 'CLIENT' %}
+        {%if request.path.startswith('/admin')%}
+          {%if current_user.role in ['STAFF','OWNER'] %}
             <li class="nav-item">
-              <a class="nav-link" href="/my_bookings">Lịch sử đặt phòng</a>
-            </li>
-          {% endif %}
-
-          {% if current_user.role == 'STAFF' %}
-            <li class="nav-item">
-              <a class="nav-link" href="/reception">Quầy thu ngân</a>
-            </li>
-          {% endif %}
-
-          {% if current_user.role in ['OWNER', 'STAFF'] %}
-            <li class="nav-item">
-              <a class="nav-link" href="/menu">Thực đơn</a>
+              <a class="nav-link" href="/analytics">Quản lý thực đơn</a>
             </li>
           {% endif %}
           {%if current_user.role == 'OWNER' %}
@@ -43,7 +27,31 @@
               <a class="nav-link" href="/analytics">Báo cáo</a>
             </li>
           {% endif %}
+        {%else%}
+        <li class="nav-item">
+          <a class="nav-link {{'active' if request.endpoint == 'home' else ''}}" href="/">Tìm phòng</a>
+        </li>
+
+        {% if current_user.is_authenticated %}
+          {% if current_user.role == 'CLIENT' %}
+            <li class="nav-item">
+              <a class="nav-link {{'active' if request.endpoint =='my_bookings' else ''}}" href="/my_bookings">Lịch sử đặt phòng</a>
+            </li>
+          {% endif %}
+
+          {% if current_user.role == 'STAFF' %}
+            <li class="nav-item">
+              <a class="nav-link {{'active' if request.endpoint =='reception' else ''}}" href="/reception">Quầy thu ngân</a>
+            </li>
+          {% endif %}
+
+          {% if current_user.role in ['OWNER', 'STAFF'] %}
+            <li class="nav-item">
+              <a class="nav-link {{'active' if request.endpoint =='menu' else ''}}" href="/menu">Thực đơn</a>
+            </li>
+          {% endif %}
         {% endif %}
+      {%endif%}
       </ul>
 
       <div class="d-flex align-items-center">
