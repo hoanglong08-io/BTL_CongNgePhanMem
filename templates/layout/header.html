@@ -19,7 +19,7 @@
         {%if request.path.startswith('/admin')%}
           {%if current_user.role in ['STAFF','OWNER'] %}
             <li class="nav-item">
-              <a class="nav-link" href="/analytics">Quản lý thực đơn</a>
+              <a class="nav-link" href="/food_and_drink">Quản lý thực đơn</a>
             </li>
           {% endif %}
           {%if current_user.role == 'OWNER' %}
@@ -39,13 +39,10 @@
             </li>
           {% endif %}
 
-          {% if current_user.role == 'STAFF' %}
+          {% if current_user.role in ['STAFF','OWNER'] %}
             <li class="nav-item">
               <a class="nav-link {{'active' if request.endpoint =='reception' else ''}}" href="/reception">Quầy thu ngân</a>
             </li>
-          {% endif %}
-
-          {% if current_user.role in ['OWNER', 'STAFF'] %}
             <li class="nav-item">
               <a class="nav-link {{'active' if request.endpoint =='menu' else ''}}" href="/menu">Thực đơn</a>
             </li>
@@ -60,13 +57,19 @@
             <span class="navbar-text text-light me-3" id="navUserInfo">
               {{ current_user.name }} {% if current_user.role %} ({{ current_user.role|lower }}) {% endif %}
             </span>
-            <a href="/logout" class="btn btn-outline-light btn-sm" id="nutDangXuat">Đăng xuất</a>
+            {%if request.path.startswith('/admin') %}
+              <a href="/admin/mylogoutview" class="btn btn-outline-light btn-sm" id="nutDangXuat">Đăng xuất</a>
+            {%else%}
+              <a href="/logout" class="btn btn-outline-light btn-sm" id="nutDangXuat">Đăng xuất</a>
+            {%endif%}
           </div>
         {% else %}
+          {%if not request.path.startswith('/admin')%}
           <div id="navGuest">
             <a class="btn btn-outline-light btn-sm me-2" href="/login">Đăng nhập</a>
             <a class="btn btn-light btn-sm fw-semibold" href="/register">Đăng ký</a>
           </div>
+          {%endif%}
         {% endif %}
       </div>
     </div>

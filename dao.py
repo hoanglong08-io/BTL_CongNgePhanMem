@@ -400,7 +400,7 @@ def thanh_toan_hoa_don(madat, phuong_thuc, user):
             user_id_str = str(user.id)
             if user_id_str.startswith('NV_'):
                 manv = int(user_id_str[3:])
-
+        
         bay_gio = datetime.now()
         ct = tinh_tien_hoa_don_tong(don)
         don_obj = DatPhong.query.get(madat)
@@ -431,6 +431,7 @@ def thanh_toan_hoa_don(madat, phuong_thuc, user):
         db.session.add(ls)
 
         db.session.commit()
+        print(manv if manv else 0)
         return True, "Thanh toán thành công."
 
     except Exception as e:

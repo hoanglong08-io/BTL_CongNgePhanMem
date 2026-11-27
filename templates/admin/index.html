@@ -1,4 +1,34 @@
-{%extends 'layout/base.html'%}
-{%block content%}
-<h1>Hello</h1>
-{%endblock%}
+{% extends 'layout/base.html' %}
+
+{% block content %}
+  {% if current_user.is_authenticated %}
+    <!-- ================= DÀNH CHO DANG NHAP THANH CONG ================= -->
+    <h2 class="text-center mt-4">Trang quản trị Karaoke</h2>
+    <p class="text-center">Chào mừng {{ current_user.TENNV or current_user.name }} quay trở lại!</p>
+
+  {% else %}
+    <!-- ================= DÀNH CHO CHUA DANG NHAP ================= -->
+    <div class="container mt-5" style="max-width: 450px;">
+      <h3 class="text-center mb-4">Đăng nhập Quản trị</h3>
+
+      <!-- Hiển thị thông báo lỗi nếu có -->
+      {% if err_msg %}
+        <div class="alert alert-danger" role="alert">
+          {{ err_msg }}
+        </div>
+      {% endif %}
+
+      <form action="/admin/login_admin" method="POST">
+        <div class="mb-3">
+          <label for="username" class="form-label">Tên đăng nhập</label>
+          <input type="text" class="form-control" id="username" name="username" required>
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Mật khẩu</label>
+          <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Đăng nhập</button>
+      </form>
+    </div>
+  {% endif %}
+{% endblock %}

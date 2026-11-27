@@ -6,9 +6,6 @@ from db import app, db
 from model import DichVu, HoaDon
 
 
-
-
-# 1. Áp dụng cho trang chủ Admin (AdminIndexView)
 class MyAdminIndexView(AdminIndexView):
 
     @expose("/")
@@ -17,33 +14,29 @@ class MyAdminIndexView(AdminIndexView):
    
 
 
-# 2. Áp dụng cho các bảng Model (CRUD Dịch vụ)
 class DichVuView(ModelView):
     column_list = ["MADV", "TENDV", "LOAIDV", "GIA", "TONKHO"]
     column_searchable_list = ["TENDV", "LOAIDV"]
     column_filters = ["LOAIDV", "GIA"]
+    def is_accessible(self)->bool:
+        return current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER'] 
 
-
-# 3. Áp dụng cho trang Thống kê (BaseView)
 class MyStatView(BaseView):
 
     @expose("/")
     def index(self):
-        # ... Giữ nguyên logic tính toán thống kê của bạn ở đây ...
         return self.render("admin/stats.html")
     def is_accessible(self)->bool:
-        return current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER']
+        return current_user.is_authenticated and current_user.role == 'OWNER'
 
 
-# 4. Trang Đăng xuất (Chỉ Admin mới chạy được)
 class MyLogoutView(BaseView):
-
     @expose("/")
     def index(self):
         logout_user()
-        return redirect("/")  # Đăng xuất xong về trang chủ chính
-    def is_accessible(self)->bool:
-        return current_user.is_authenticated and current_user.role in ['STAFF', 'OWNER']
+        return redirect("/admin")
+    def is_accessible(self) -> bool:
+        return current_user.is_authenticated
 
 # Khởi tạo Admin
 admin = Admin(
@@ -56,4 +49,4 @@ admin = Admin(
 
 admin.add_view(DichVuView(DichVu, db.session, name="Food and drink"))
 admin.add_view(MyStatView(name="Analystic"))
-admin.add_view(MyLogoutView(name="Log out"))
+admin.add_view(MyLogoutView(name="Đăng xuất"))

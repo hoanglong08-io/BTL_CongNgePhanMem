@@ -5,7 +5,7 @@ import dao
 from db import app
 from datetime import datetime
 from flask_login import LoginManager, login_user, logout_user, login_url, login_required, current_user
-from flask_admin import BaseView, expose
+
 
 
 # app = Flask(__name__)
@@ -142,7 +142,7 @@ def login():
 def logout():
     # session.clear()
     logout_user()
-    return redirect('/')
+    return redirect('/login')
 
 
 @app.route('/register', methods=['GET','POST'])
@@ -327,17 +327,19 @@ def checkout(madat):
 # xong lich su dat phòng (done)
 
 # admin-------
-@app.route('/login-admin', methods=['POST'])
+@app.route('/admin/login_admin', methods=['POST', 'GET'])
 def login_admin():
+    if request.method == 'GET':
+        return redirect('/admin')
     username = request.form.get('username')
-    passwd = request.form.get('passwd')
+    passwd = request.form.get('password')
     u = dao.check_login(username=username, password=passwd)
-    if u:
+    if u and u.role in ['STAFF','OWNER']:
         login_user(user=u)
         return redirect('/admin')
     else:
         err_msg = "Tài khoản hoặc mật khẩu chưa đúng!"
-        return render_template("admin/login.html", err_msg=err_msg)
+        return render_template("admin/index.html", err_msg=err_msg)
 import admin
 
 if __name__ == "__main__":
